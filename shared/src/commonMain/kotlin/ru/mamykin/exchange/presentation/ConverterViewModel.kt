@@ -7,8 +7,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import ru.mamykin.exchange.Closeable
 import ru.mamykin.exchange.domain.ConverterInteractor
 import ru.mamykin.exchange.domain.RateEntity
+import ru.mamykin.exchange.subscribeClosable
 
 class ConverterViewModel(
     private val interactor: ConverterInteractor,
@@ -22,10 +24,24 @@ class ConverterViewModel(
     val error = MutableStateFlow<String?>(null)
     val currentRateChanged = MutableStateFlow<Unit?>(null)
 
-    fun observeData(onEach: (CurrencyRatesViewData) -> Unit) {
-        rates
-            .onEach { it?.let { it1 -> onEach(it1) } }
-            .launchIn(viewModelScope)
+    @Suppress("unused")
+    fun observeRates(onEach: (CurrencyRatesViewData?) -> Unit): Closeable {
+        return rates.subscribeClosable(viewModelScope, onEach)
+    }
+
+    @Suppress("unused")
+    fun observeIsLoading(onEach: (Boolean) -> Unit): Closeable {
+        return isLoading.subscribeClosable(viewModelScope, onEach)
+    }
+
+    @Suppress("unused")
+    fun observeError(onEach: (String?) -> Unit): Closeable {
+        return error.subscribeClosable(viewModelScope, onEach)
+    }
+
+    @Suppress("unused")
+    fun observeCurrentRateChanged(onEach: (Unit?) -> Unit): Closeable {
+        return currentRateChanged.subscribeClosable(viewModelScope, onEach)
     }
 
     fun startRatesLoading() {

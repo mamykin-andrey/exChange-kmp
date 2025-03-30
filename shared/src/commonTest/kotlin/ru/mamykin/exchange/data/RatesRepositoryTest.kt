@@ -3,10 +3,9 @@ package ru.mamykin.exchange.data
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Test
 import ru.mamykin.exchange.data.network.RateListResponse
 import ru.mamykin.exchange.data.network.RatesNetworkClient
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class RatesRepositoryTest {
@@ -24,8 +23,7 @@ class RatesRepositoryTest {
     private val ratesResponse2 = RateListResponse("EUR", rates2.toMap())
     private val repository = RatesRepository(ratesApi)
 
-    @Before
-    fun setUp() {
+    init {
         coEvery { ratesApi.getRates(any()) } returnsMany (listOf(ratesResponse1, ratesResponse2))
     }
 
