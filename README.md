@@ -22,7 +22,7 @@ Prerequisites
 Setup
 1. Clone the repo:
 `git clone git@github.com:mamykin-andrey/exChange-kmp.git && cd exChange`
-2. Add your API key to a local config file or as an environment variable.
+2. Add your API key to local.properties as `exchangeapikey=YOUR_KEY`
 3. Run the app:
 3.1 Android: Open the project in Android Studio and run on an emulator or device.
 3.2 iOS: Open the iosApp folder with Xcode and run on a simulator or device.
