@@ -1,112 +1,91 @@
-// package ru.mamykin.exchange.domain
-//
-// import com.nhaarman.mockito_kotlin.whenever
-// import io.reactivex.Single
-// import io.reactivex.android.plugins.RxAndroidPlugins
-// import io.reactivex.plugins.RxJavaPlugins
-// import org.hamcrest.CoreMatchers.`is`
-// import org.hamcrest.MatcherAssert.assertThat
-// import org.junit.After
-// import org.junit.Before
-// import org.junit.Rule
-// import org.junit.Test
-// import org.mockito.Mock
-// import org.mockito.MockitoAnnotations
-// import ru.mamykin.exchange.data.RatesRepository
-// import kotlin.util.*
-// import kotlin.util.concurrent.TimeUnit
-//
-// class ConverterInteractorTest {
-//
-//     companion object {
-//         const val RUB_CURRENCY = "RUB"
-//     }
-//
-//     @get:Rule
-//     val testSchedulerRule = TestSchedulerRule()
-//     @Mock
-//     lateinit var ratesRepository: RatesRepository
-//
-//     val todayDate = Date()
-//     val rateList1 = RateList(RUB_CURRENCY, todayDate, listOf(RateEntity("USD", 0.015f)))
-//     val rateList2 = RateList(RUB_CURRENCY, todayDate, listOf(RateEntity("EUR", 0.013f)))
-//     val rateList3 = RateList(RUB_CURRENCY, todayDate, listOf(RateEntity("USD", 0.015f), RateEntity("EUR", 0.013f)))
-//     lateinit var interactor: ConverterInteractor
-//
-//     @Before
-//     fun setUp() {
-//         MockitoAnnotations.initMocks(this)
-//         interactor = ConverterInteractor(ratesRepository)
-//         whenever(ratesRepository.getRates(true))
-//                 .thenReturn(Single.just(rateList1), Single.just(rateList2))
-//     }
-//
-//     @After
-//     fun tearDown() {
-//         RxJavaPlugins.reset()
-//         RxAndroidPlugins.reset()
-//     }
-//
-//     @Test
-//     fun getRates_shouldReturnOneItemEverySecond() {
-//         val testObserver = interactor.getRates(RUB_CURRENCY, 1f, true).test()
-//         testSchedulerRule.testScheduler.advanceTimeBy(2, TimeUnit.SECONDS)
-//
-//         // Because first item emits without timeout
-//         testObserver.assertNoErrors().assertValueCount(3)
-//     }
-//
-//     @Test
-//     fun getRates_shouldDoesNotStopUpdates_whenErrorOccurs() {
-//         whenever(ratesRepository.getRates(true)).thenReturn(
-//                 Single.just(rateList1),
-//                 Single.error(RuntimeException()),
-//                 Single.just(rateList2)
-//         )
-//
-//         val testObserver = interactor.getRates(RUB_CURRENCY, 1f, true).test()
-//         testSchedulerRule.testScheduler.advanceTimeBy(3, TimeUnit.SECONDS)
-//
-//         testObserver.assertNoErrors().assertValueCount(4)
-//     }
-//
-//     @Test
-//     fun getRates_shouldAddCurrentCurrencyRateToTopOfList() {
-//         val testObserver = interactor.getRates(RUB_CURRENCY, 1f, true).test()
-//         testSchedulerRule.testScheduler.advanceTimeBy(0, TimeUnit.SECONDS)
-//
-//         testObserver.assertNoErrors().assertValue { it.rates.first().code == RUB_CURRENCY }
-//     }
-//
-//     @Test
-//     fun getRates_shouldReturnCurrenciesAmountWithExchangeRate() {
-//         val expectedRates = listOf(RateEntity("USD", 1.5f), RateEntity("EUR", 1.3000001f))
-//         whenever(ratesRepository.getRates(true)).thenReturn(Single.just(rateList3))
-//
-//         val testObserver = interactor.getRates(RUB_CURRENCY, 100f, true).test()
-//         testSchedulerRule.testScheduler.advanceTimeBy(0, TimeUnit.SECONDS)
-//
-//         testObserver.assertNoErrors().assertValue { it.rates.skip(1) == expectedRates }
-//     }
-//
-//     @Test
-//     fun needRecalculate_shouldReturnFalse_whenCurrencyAreEqual() {
-//         val needRecalculate = interactor.needRecalculate("EUR", "EUR", 123.25f, 123.25f)
-//
-//         assertThat(needRecalculate, `is`(false))
-//     }
-//
-//     @Test
-//     fun needRecalculate_shouldReturnTrue_whenCurrencyCodesAreNotEqual() {
-//         val currencyEquals = interactor.needRecalculate("EUR", "USD", 12.20f, 12.20f)
-//
-//         assertThat(currencyEquals, `is`(true))
-//     }
-//
-//     @Test
-//     fun needRecalculate_shouldReturnTrue_whenAmountDiffMoreThanPrecision() {
-//         val currencyEquals = interactor.needRecalculate("USD", "USD", 12.20f, 12.25f)
-//
-//         assertThat(currencyEquals, `is`(true))
-//     }
-// }
+package ru.mamykin.exchange.domain
+
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.runTest
+import ru.mamykin.exchange.data.RatesRepository
+import ru.mamykin.exchange.presentation.CurrentCurrencyRate
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class ConverterInteractorTest {
+
+    companion object {
+        const val TEST_BASE_CURRENCY = "RUB"
+    }
+
+    private val ratesRepository: RatesRepository = mockk()
+
+    private val rateList1 =
+        listOf(RateEntity(TEST_BASE_CURRENCY, 100f), RateEntity("USD", 1.1f), RateEntity("EUR", 1f))
+    private val rateList2 =
+        listOf(RateEntity(TEST_BASE_CURRENCY, 100f), RateEntity("USD", 1.2f), RateEntity("EUR", 1f))
+
+    private val testCoroutineScheduler = TestCoroutineScheduler()
+    private val testCoroutineDispatcher = StandardTestDispatcher(testCoroutineScheduler)
+    private val interactor = ConverterInteractor(ratesRepository)
+
+    init {
+        coEvery { ratesRepository.getRates(any()) } returnsMany listOf(rateList1, rateList2)
+    }
+
+    @Test
+    fun getRates_shouldReturnDataPerSetTimeWindow() = runTest(testCoroutineDispatcher) {
+        var emissionsCount = 0
+        val job = launch {
+            interactor.getRates(CurrentCurrencyRate(TEST_BASE_CURRENCY, "1.0", null), false)
+                .flowOn(testCoroutineDispatcher)
+                .collect { emissionsCount++ }
+        }
+
+        testCoroutineScheduler.advanceTimeBy(ConverterInteractor.EXCHANGE_UPDATE_PERIOD_MS + 1_000)
+        job.cancel()
+
+        assertEquals(2, emissionsCount)
+    }
+
+    @Test
+    fun getRates_shouldDoesNotStopUpdates_whenErrorOccurs() = runTest(testCoroutineScheduler) {
+        coEvery { ratesRepository.getRates(true) } returns rateList1
+        coEvery { ratesRepository.getRates(true) } throws RuntimeException()
+        coEvery { ratesRepository.getRates(true) } returns rateList2
+        var emissionsCount = 0
+        val job = launch {
+            interactor.getRates(CurrentCurrencyRate(TEST_BASE_CURRENCY, "1.0", null), false)
+                .flowOn(testCoroutineDispatcher)
+                .collect { emissionsCount++ }
+        }
+
+        testCoroutineScheduler.advanceTimeBy(ConverterInteractor.EXCHANGE_UPDATE_PERIOD_MS * 2 + 1_000)
+        job.cancel()
+
+        assertEquals(3, emissionsCount)
+    }
+
+    @Test
+    fun getRates_shouldMoveCurrentCurrencyRateToTopOfList() = runTest(testCoroutineDispatcher) {
+        val result = interactor.getRates(CurrentCurrencyRate(TEST_BASE_CURRENCY, "1.0", null), true)
+            .flowOn(testCoroutineDispatcher).take(1).first()
+
+        assertEquals(result.getOrThrow().first().code, TEST_BASE_CURRENCY)
+    }
+
+    @Test
+    fun getRates_shouldReturnCurrenciesAmountWithExchangeRate() = runTest {
+        val expectedRates = listOf(
+            RateEntity(code = "RUB", amount = 200f),
+            RateEntity(code = "USD", amount = 2.2f),
+            RateEntity(code = "EUR", amount = 2f)
+        )
+
+        val result = interactor.getRates(CurrentCurrencyRate(TEST_BASE_CURRENCY, "200", null), false).first()
+
+        assertEquals(Result.success(expectedRates), result)
+    }
+}

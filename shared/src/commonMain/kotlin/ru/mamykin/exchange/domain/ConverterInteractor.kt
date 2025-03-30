@@ -1,27 +1,20 @@
 package ru.mamykin.exchange.domain
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import ru.mamykin.exchange.VisibleForTesting
+import ru.mamykin.exchange.catchSafely
 import ru.mamykin.exchange.data.RatesRepository
 import ru.mamykin.exchange.presentation.CurrentCurrencyRate
 
 class ConverterInteractor(
     private val ratesRepository: RatesRepository,
-    private val isDispatcher: CoroutineDispatcher,
 ) {
-    constructor(
-        ratesRepository: RatesRepository
-    ) : this(ratesRepository, Dispatchers.IO)
-
     companion object {
+        @VisibleForTesting
+        const val EXCHANGE_UPDATE_PERIOD_MS = 30_000L
         private const val API_BASE_CURRENCY_CODE = "EUR" // limitations of the API free plan
-        private const val EXCHANGE_UPDATE_PERIOD_MS = 30_000L
     }
 
     /**
@@ -43,8 +36,7 @@ class ConverterInteractor(
             emit(Result.success(sortedRates))
             delay(EXCHANGE_UPDATE_PERIOD_MS)
         }
-    }.catch { emit(Result.failure(it)) }
-        .flowOn(isDispatcher)
+    }.catchSafely { emit(Result.failure(it)) }
 
     private fun calculateExchangeRate(
         rates: List<RateEntity>,

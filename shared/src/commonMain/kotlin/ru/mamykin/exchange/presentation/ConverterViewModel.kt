@@ -15,7 +15,7 @@ import ru.mamykin.exchange.subscribeClosable
 class ConverterViewModel(
     private val interactor: ConverterInteractor,
 ) {
-    private val viewModelScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var ratesJob: Job? = null
     private var currentCurrency: CurrentCurrencyRate? = null
 
