@@ -5,15 +5,12 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import org.koin.android.ext.android.inject
 import ru.mamykin.exchange.R
-import ru.mamykin.exchange.core.di.Scopes
-import toothpick.Toothpick
 
 internal class ConverterActivity : AppCompatActivity() {
 
-    private val viewModel by lazy {
-        Toothpick.openScopes(Scopes.APP_SCOPE, this).getInstance(ConverterViewModel::class.java)
-    }
+    private val viewModel: ConverterViewModel by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,12 +31,5 @@ internal class ConverterActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         viewModel.stopRatesLoading()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (isFinishing) {
-            Toothpick.closeScope(this)
-        }
     }
 }

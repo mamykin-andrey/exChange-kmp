@@ -36,6 +36,8 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.mockk.common)
+                implementation(libs.koin.core)
+                implementation(libs.koin.test)
             }
         }
         val commonTest by getting {

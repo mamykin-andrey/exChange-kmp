@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    kotlin("kapt")
 }
 
 kotlin {
@@ -21,20 +20,14 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(project(":shared"))
             implementation(libs.androidx.material)
-
             implementation(platform("androidx.compose:compose-bom:2024.06.00"))
             implementation(libs.activity.compose)
             implementation(libs.androidx.ui)
             implementation(libs.androidx.ui.graphics)
             implementation(libs.androidx.material3)
-
-            implementation("com.github.stephanenicolas.toothpick:ktp:3.1.0")
+            implementation(libs.koin.core)
+            implementation(libs.koin.android)
             implementation("com.squareup.picasso:picasso:2.71828")
-
-//            testImplementation "junit:junit:4.13.2"
-//            testImplementation "org.mockito:mockito-core:5.10.0"
-//            testImplementation "org.mockito.kotlin:mockito-kotlin:5.2.1"
-//            testImplementation "androidx.arch.core:core-testing:2.2.0"
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -81,13 +74,7 @@ android {
         compose = true
         buildConfig = true
     }
-    kapt {
-        arguments {
-            arg("toothpick_registry_package_name", "ru.mamykin.exchange")
-        }
-    }
     dependencies {
         debugImplementation(compose.uiTooling)
-        add("kapt", "com.github.stephanenicolas.toothpick:toothpick-compiler:3.1.0")
     }
 }

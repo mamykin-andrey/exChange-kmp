@@ -8,7 +8,7 @@ A Kotlin Multiplatform (KMP) showcase application that fetches currency exchange
 - Kotlin Multiplatform Mobile (KMM) - Android & iOS
 - Ktor
 - Kotlin Coroutines + Flow
-- Koin (WIP)
+- Koin
 - Clean Architecture + MVVM
 - Swift UI (iOS) (WIP) + Jetpack Compose (Android)
 
