@@ -8,9 +8,9 @@ A Kotlin Multiplatform (KMP) showcase application that fetches currency exchange
 - Kotlin Multiplatform Mobile (KMM) - Android & iOS
 - Ktor
 - Kotlin Coroutines + Flow
-- Koin
-- Clean Architecture
-- MVVM
+- Koin (WIP)
+- Clean Architecture + MVVM
+- Swift UI (iOS) (WIP) + Jetpack Compose (Android)
 
 🚀 Getting Started
 
@@ -31,10 +31,12 @@ Setup
 
 ```
 |- androidApp
+|--- Jetpack Compose code
 |- iosApp
+|--- Swift UI code
 |- shared
 |--- data             # Data sources, API, DTOs
 |--- domain           # Use cases, domain models
 |--- presentation     # ViewModels, UI states
-|--- di               # Dependency injection setup (Koin)
+|--- di               # Dependency injection
 ```
