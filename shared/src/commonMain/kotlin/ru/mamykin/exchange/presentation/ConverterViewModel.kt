@@ -5,11 +5,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.mamykin.exchange.Closeable
 import ru.mamykin.exchange.domain.ConverterInteractor
 import ru.mamykin.exchange.domain.RateEntity
+import ru.mamykin.exchange.logDebug
 import ru.mamykin.exchange.subscribeClosable
 
 class ConverterViewModel(
@@ -19,10 +21,34 @@ class ConverterViewModel(
     private var ratesJob: Job? = null
     private var currentCurrency: CurrentCurrencyRate? = null
 
+    @Deprecated("")
     val isLoading = MutableStateFlow(true)
+
+    @Deprecated("")
     val rates = MutableStateFlow<CurrencyRatesViewData?>(null)
+
+    @Deprecated("")
     val error = MutableStateFlow<String?>(null)
+
+    @Deprecated("")
     val currentRateChanged = MutableStateFlow<Unit?>(null)
+
+    private val mutableStateFlow = MutableStateFlow<State>(State.Loading)
+    private val state: State
+        get() = mutableStateFlow.value
+    val stateFlow: StateFlow<State> = mutableStateFlow
+
+    sealed class State {
+        data object Loading : State()
+        data object Error : State()
+        data class Loaded(
+            val rates: List<RateViewData>,
+        ) : State()
+    }
+
+    // sealed class Effect {
+    //     data object CurrentRateChanged : Effect()
+    // }
 
     @Suppress("unused")
     fun observeRates(onEach: (CurrencyRatesViewData?) -> Unit): Closeable {
@@ -69,7 +95,6 @@ class ConverterViewModel(
         isLoading.value = true
         ratesJob?.cancel()
         ratesJob = interactor.getRates(currentCurrency, currencyChanged).onEach {
-            isLoading.value = false
             onRatesLoaded(it, currentCurrency, currencyChanged)
         }.launchIn(viewModelScope)
     }
@@ -81,13 +106,18 @@ class ConverterViewModel(
     ) {
         result.fold(
             onSuccess = {
-                rates.value = CurrencyRatesViewData(it, currentCurrency)
+                val rateViewData = CurrencyRatesViewData(it, currentCurrency)
+                rates.value = rateViewData
+                mutableStateFlow.value =
+                    State.Loaded(rateViewData.rates.map { RateViewData.fromDomainModel(it, currentCurrency) })
+                logDebug("ConverterViewModel", "onRatesLoaded: $state")
                 if (currencyChanged) {
                     currentRateChanged.value = Unit
+                    // TODO: effect
                 }
             },
             onFailure = {
-                // error.postValue(R.string.error_network)
+                mutableStateFlow.value = State.Error
                 error.value = "Network error, please try again"
                 ratesJob?.cancel() // let the user retry when needed
             },

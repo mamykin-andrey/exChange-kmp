@@ -1,20 +1,20 @@
 package ru.mamykin.exchange.core
 
-import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import ru.mamykin.exchange.BuildConfig
+import ru.mamykin.exchange.R
 
-private const val DRAWABLE_TYPE = "drawable"
-
+@Composable
 @DrawableRes
-internal fun Context.getDrawableResId(
-    prefix: String,
+internal fun getDrawableResId(
     id: String,
-    @DrawableRes defaultDrawableId: Int
 ): Int {
-    val drawableResName = prefix + id
-    val iconResId = resources.getIdentifier(
-        drawableResName, DRAWABLE_TYPE, BuildConfig.APPLICATION_ID
+    val context = LocalContext.current
+    val drawableResName = "cur_icon_$id"
+    val iconResId = context.resources.getIdentifier(
+        drawableResName, "drawable", BuildConfig.APPLICATION_ID
     )
-    return if (iconResId != 0) iconResId else defaultDrawableId
+    return if (iconResId != 0) iconResId else R.drawable.cur_icon_unknown
 }
