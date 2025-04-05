@@ -34,21 +34,19 @@ kotlin {
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.kotlinx.serialization.json)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.mockk.common)
                 implementation(libs.koin.core)
-                implementation(libs.koin.test)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.koin.test)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
         val androidUnitTest by getting {
             dependencies {
                 implementation(libs.junit)
-                implementation(libs.mockk)
             }
         }
         val iosMain by creating {

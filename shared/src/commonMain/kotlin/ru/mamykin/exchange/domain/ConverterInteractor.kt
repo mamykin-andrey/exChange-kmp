@@ -3,7 +3,7 @@ package ru.mamykin.exchange.domain
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.mamykin.exchange.VisibleForTesting
+import ru.mamykin.exchange.internal.VisibleForTesting
 import ru.mamykin.exchange.catchSafely
 import ru.mamykin.exchange.data.RatesRepository
 import ru.mamykin.exchange.presentation.CurrentCurrencyRate

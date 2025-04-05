@@ -1,16 +1,13 @@
 package ru.mamykin.exchange.data
 
-import io.mockk.coEvery
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import ru.mamykin.exchange.data.network.RateListResponse
-import ru.mamykin.exchange.data.network.RatesNetworkClient
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class RatesRepositoryTest {
 
-    private val ratesApi: RatesNetworkClient = mockk()
+    private val ratesApi = FakeRatesNetworkClient()
     private val rates1 = listOf(
         "RUB" to 100f,
         "USD" to 1f,
@@ -24,7 +21,7 @@ class RatesRepositoryTest {
     private val repository = RatesRepository(ratesApi)
 
     init {
-        coEvery { ratesApi.getRates(any()) } returnsMany (listOf(ratesResponse1, ratesResponse2))
+        ratesApi.everyGetRatesReturn(ratesResponse1, ratesResponse2)
     }
 
     @Test
@@ -41,11 +38,11 @@ class RatesRepositoryTest {
         // updates cache and uses rates/response 1
         repository.getRates(false)
 
-        val it = repository.getRates(false)
+        val rates = repository.getRates(false)
 
-        assertEquals(rates1.size, it.size)
-        assertEquals(rates1.first(), it.first().let { it.code to it.amount })
-        assertEquals(rates1[1], it[1].let { it.code to it.amount })
+        assertEquals(rates1.size, rates.size)
+        assertEquals(rates1.first(), rates.first().let { it.code to it.amount })
+        assertEquals(rates1[1], rates[1].let { it.code to it.amount })
     }
 
     @Test
@@ -53,10 +50,10 @@ class RatesRepositoryTest {
         // updates cache and uses rates/response 1
         repository.getRates(false)
 
-        val it = repository.getRates(true)
+        val rates = repository.getRates(true)
 
-        assertEquals(rates2.size, it.size)
-        assertEquals(rates2.first(), it.first().let { it.code to it.amount })
-        assertEquals(rates2[1], it[1].let { it.code to it.amount })
+        assertEquals(rates2.size, rates.size)
+        assertEquals(rates2.first(), rates.first().let { it.code to it.amount })
+        assertEquals(rates2[1], rates[1].let { it.code to it.amount })
     }
 }

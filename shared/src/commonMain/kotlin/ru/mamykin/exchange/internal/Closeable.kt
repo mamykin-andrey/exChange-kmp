@@ -1,4 +1,4 @@
-package ru.mamykin.exchange
+package ru.mamykin.exchange.internal
 
 interface Closeable {
     fun onClose()

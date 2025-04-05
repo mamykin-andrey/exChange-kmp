@@ -11,8 +11,10 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import ru.mamykin.exchange.internal.OpenForTesting
 
-class RatesNetworkClient {
+@OpenForTesting
+open class RatesNetworkClient {
 
     companion object {
         const val BASE_URL = "https://api.exchangeratesapi.io/"
@@ -33,7 +35,7 @@ class RatesNetworkClient {
         }
     }
 
-    suspend fun getRates(requestedCurrencyCodes: String = "RUB,EUR,USD,JPY"): RateListResponse {
+    open suspend fun getRates(requestedCurrencyCodes: String = "RUB,EUR,USD,JPY"): RateListResponse {
         val response =
             httpClient.get("$BASE_URL/v1/latest?access_key=$apiKey&format=1&symbols=$requestedCurrencyCodes")
         return response.body()
