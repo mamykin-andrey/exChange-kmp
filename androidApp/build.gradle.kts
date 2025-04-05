@@ -21,8 +21,6 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(project(":shared"))
             implementation(libs.androidx.material)
-            implementation(libs.androidx.appcompat)
-            implementation(libs.androidx.constraintlayout)
 
             implementation(platform("androidx.compose:compose-bom:2024.06.00"))
             implementation(libs.activity.compose)
@@ -30,9 +28,6 @@ kotlin {
             implementation(libs.androidx.ui.graphics)
             implementation(libs.androidx.material3)
 
-            implementation("androidx.appcompat:appcompat:1.7.0")
-            implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-            implementation("com.google.android.material:material:1.12.0")
             implementation("com.github.stephanenicolas.toothpick:ktp:3.1.0")
             implementation("com.squareup.picasso:picasso:2.71828")
 

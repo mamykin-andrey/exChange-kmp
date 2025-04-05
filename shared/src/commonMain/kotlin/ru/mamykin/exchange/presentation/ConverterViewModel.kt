@@ -21,16 +21,16 @@ class ConverterViewModel(
     private var ratesJob: Job? = null
     private var currentCurrency: CurrentCurrencyRate? = null
 
-    @Deprecated("")
+    @Deprecated("Remove when iOS is migrated")
     val isLoading = MutableStateFlow(true)
 
-    @Deprecated("")
+    @Deprecated("Remove when iOS is migrated")
     val rates = MutableStateFlow<CurrencyRatesViewData?>(null)
 
-    @Deprecated("")
+    @Deprecated("Remove when iOS is migrated")
     val error = MutableStateFlow<String?>(null)
 
-    @Deprecated("")
+    @Deprecated("Remove when iOS is migrated")
     val currentRateChanged = MutableStateFlow<Unit?>(null)
 
     private val mutableStateFlow = MutableStateFlow<State>(State.Loading)
@@ -42,7 +42,7 @@ class ConverterViewModel(
         data object Loading : State()
         data object Error : State()
         data class Loaded(
-            val rates: List<RateViewData>,
+            val rates: List<CurrencyRateViewData>,
         ) : State()
     }
 
@@ -109,7 +109,7 @@ class ConverterViewModel(
                 val rateViewData = CurrencyRatesViewData(it, currentCurrency)
                 rates.value = rateViewData
                 mutableStateFlow.value =
-                    State.Loaded(rateViewData.rates.map { RateViewData.fromDomainModel(it, currentCurrency) })
+                    State.Loaded(rateViewData.rates.map { CurrencyRateViewData.fromDomainModel(it, currentCurrency) })
                 logDebug("ConverterViewModel", "onRatesLoaded: $state")
                 if (currencyChanged) {
                     currentRateChanged.value = Unit

@@ -3,8 +3,7 @@ package ru.mamykin.exchange.presentation
 import ru.mamykin.exchange.domain.RateEntity
 import ru.mamykin.exchange.formatNumber
 
-// TODO: Rename to CurrencyRateViewData
-data class RateViewData(
+data class CurrencyRateViewData(
     val code: String,
     val amountStr: String,
     val cursorPosition: Int? = null
@@ -14,7 +13,7 @@ data class RateViewData(
         fun fromDomainModel(
             rate: RateEntity,
             currentCurrency: CurrentCurrencyRate?,
-        ): RateViewData {
+        ): CurrencyRateViewData {
             val formattedAmount = if (rate.code == currentCurrency?.code)
                 currentCurrency.amountStr
             else
@@ -23,7 +22,7 @@ data class RateViewData(
                 currentCurrency.cursorPosition
             } else
                 null
-            return RateViewData(
+            return CurrencyRateViewData(
                 code = rate.code,
                 amountStr = formattedAmount,
                 cursorPosition = cursorPosition,

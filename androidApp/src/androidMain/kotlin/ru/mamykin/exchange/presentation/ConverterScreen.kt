@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,7 @@ import ru.mamykin.exchange.core.getDrawableResId
 internal fun ConverterScreen(
     state: ConverterViewModel.State,
     currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
+    onCloseClicked: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -64,7 +66,7 @@ internal fun ConverterScreen(
                     Text(text = stringResource(R.string.rates_and_conversions_title))
                 },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { onCloseClicked() }) {
                         Icon(Icons.Filled.Close, "")
                     }
                 }
@@ -99,7 +101,7 @@ private fun RatesListComposable(
 
 @Composable
 private fun CurrencyListItemComposable(
-    viewData: RateViewData,
+    viewData: CurrencyRateViewData,
     onCurrencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -131,11 +133,16 @@ private fun CurrencyListItemComposable(
 
         val focusRequester = remember { FocusRequester() }
         var textFieldValue by remember { mutableStateOf(TextFieldValue(text = viewData.amountStr)) }
+        LaunchedEffect(viewData.amountStr) {
+            if (!isFocused && viewData.amountStr != textFieldValue.text) {
+                textFieldValue = textFieldValue.copy(text = viewData.amountStr)
+            }
+        }
         TextField(
             value = textFieldValue,
             onValueChange = { newValue ->
                 textFieldValue = newValue
-                if (isFocused && newValue.text.isNotBlank()) {
+                if (isFocused && newValue.text != viewData.amountStr && newValue.text.isNotBlank()) {
                     onCurrencyOrAmountChanged(
                         CurrentCurrencyRate(
                             code = viewData.code,
@@ -215,10 +222,10 @@ fun ConverterScreenPreview() {
         ConverterScreen(
             ConverterViewModel.State.Loaded(
                 listOf(
-                    RateViewData("RUB", "900.50"),
-                    RateViewData("USD", "1"),
+                    CurrencyRateViewData("RUB", "900.50"),
+                    CurrencyRateViewData("USD", "1"),
                 )
             ),
-        ) {}
+            {}, {})
     }
 }
