@@ -33,22 +33,19 @@ class ConverterViewModel(
     @Deprecated("Remove when iOS is migrated")
     val currentRateChanged = MutableStateFlow<Unit?>(null)
 
-    private val mutableStateFlow = MutableStateFlow<State>(State.Loading)
-    private val state: State
+    private val mutableStateFlow = MutableStateFlow<ConverterScreenState>(ConverterScreenState.Loading)
+    private val state: ConverterScreenState
         get() = mutableStateFlow.value
-    val stateFlow: StateFlow<State> = mutableStateFlow
-
-    sealed class State {
-        data object Loading : State()
-        data object Error : State()
-        data class Loaded(
-            val rates: List<CurrencyRateViewData>,
-        ) : State()
-    }
+    val stateFlow: StateFlow<ConverterScreenState> = mutableStateFlow
 
     // sealed class Effect {
     //     data object CurrentRateChanged : Effect()
     // }
+
+    @Suppress("unused")
+    fun observeState(onEach: (state: ConverterScreenState) -> Unit): Closeable {
+        return stateFlow.subscribeClosable(viewModelScope, onEach)
+    }
 
     @Suppress("unused")
     fun observeRates(onEach: (CurrencyRatesViewData?) -> Unit): Closeable {
@@ -109,7 +106,12 @@ class ConverterViewModel(
                 val rateViewData = CurrencyRatesViewData(it, currentCurrency)
                 rates.value = rateViewData
                 mutableStateFlow.value =
-                    State.Loaded(rateViewData.rates.map { CurrencyRateViewData.fromDomainModel(it, currentCurrency) })
+                    ConverterScreenState.Loaded(rateViewData.rates.map {
+                        CurrencyRateViewData.fromDomainModel(
+                            it,
+                            currentCurrency
+                        )
+                    })
                 logDebug("ConverterViewModel", "onRatesLoaded: $state")
                 if (currencyChanged) {
                     currentRateChanged.value = Unit
@@ -117,10 +119,18 @@ class ConverterViewModel(
                 }
             },
             onFailure = {
-                mutableStateFlow.value = State.Error
+                mutableStateFlow.value = ConverterScreenState.Error
                 error.value = "Network error, please try again"
                 ratesJob?.cancel() // let the user retry when needed
             },
         )
     }
+}
+
+sealed class ConverterScreenState {
+    data object Loading : ConverterScreenState()
+    data object Error : ConverterScreenState()
+    data class Loaded(
+        val rates: List<CurrencyRateViewData>,
+    ) : ConverterScreenState()
 }

@@ -17,6 +17,7 @@ struct CurrencyRow: View {
         HStack {
             Image(systemName: "pencil")
                 .frame(width: 24)
+                .padding([.leading, .trailing], 12)
             
             Text(title)
                 .frame(minWidth: 80, alignment: .leading)
@@ -31,28 +32,19 @@ struct CurrencyRow: View {
     }
 }
 
-class SampleViewModelWrapper: ObservableObject {
+class ConverterViewModelWrapper : ObservableObject {
     private let viewModel: ConverterViewModel
-    
     @State private var observers: [Closeable] = []
-    @Published var rates: [RateEntity] = []
+    @Published var state: ConverterScreenState = ConverterScreenState.Loading()
     
     init() {
-        let networkClient = RatesNetworkClient()
-        let repository = RatesRepository(ratesNetworkClient: networkClient)
-        let interactor = ConverterInteractor(ratesRepository: repository)
-        viewModel = ConverterViewModel(interactor: interactor)
+        viewModel = KoinHelper().getViewModel()
     }
     
     func startObserving() {
-        observers.append(viewModel.observeRates(onEach: { data in
-            if let data {
-                self.rates = data.rates
-            }
+        observers.append(viewModel.observeState(onEach: { state in
+            self.state = state
         }))
-        observers.append(viewModel.observeIsLoading(onEach: { isLoading in }))
-        observers.append(viewModel.observeError(onEach: { errorStr in }))
-        observers.append(viewModel.observeCurrentRateChanged(onEach: { _ in }))
         viewModel.startRatesLoading()
     }
     
@@ -62,25 +54,52 @@ class SampleViewModelWrapper: ObservableObject {
     }
 }
 
-struct CurrencyListView: View {
-    @StateObject private var viewModelWrapper = SampleViewModelWrapper()
+struct ConverterView: View {
+    
+    @StateObject var viewModel = ConverterViewModelWrapper()
     
     var body: some View {
+        Group {
+            if viewModel.state is ConverterScreenState.Loading {
+                loadingView()
+            } else if let loadedState = viewModel.state as? ConverterScreenState.Loaded {
+                loadedView(rates: loadedState.rates)
+            } else if viewModel.state is ConverterScreenState.Error {
+                errorView()
+            }
+        }.onAppear {
+            viewModel.startObserving()
+        }.onDisappear {
+            viewModel.stopObserving()
+        }
+    }
+    
+    private func loadedView(rates: [CurrencyRateViewData] = []) -> some View {
         List {
-            ForEach(viewModelWrapper.rates, id: \.self) { rate in
-                let amountStr = String(format: "%.2f", rate.amount)
-                CurrencyRow(iconUrl: "", title: rate.code, amountStr: .constant(amountStr))
+            ForEach(rates, id: \.self) { rate in
+                CurrencyRow(iconUrl: "", title: rate.code, amountStr: .constant(rate.amountStr))
             }
         }
         .listStyle(PlainListStyle())
-        .onAppear {
-            viewModelWrapper.startObserving()
-        }.onDisappear {
-            viewModelWrapper.stopObserving()
+    }
+    
+    private func loadingView() -> some View {
+        ProgressView("Loading...")
+            .padding()
+    }
+    
+    private func errorView() -> some View {
+        VStack {
+            Text("Error")
+                .font(.headline)
+                .foregroundColor(.red)
+            Text("Please try again later")
+                .foregroundColor(.gray)
         }
+        .padding()
     }
 }
 
 #Preview {
-    CurrencyListView()
+    ConverterView()
 }

@@ -55,7 +55,7 @@ import ru.mamykin.exchange.core.getDrawableResId
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ConverterScreen(
-    state: ConverterViewModel.State,
+    state: ConverterScreenState,
     currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
     onCloseClicked: () -> Unit,
 ) {
@@ -74,9 +74,9 @@ internal fun ConverterScreen(
         }, content = { innerPadding ->
             Box(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
                 when (state) {
-                    is ConverterViewModel.State.Loading -> GenericLoadingIndicatorComposable()
-                    is ConverterViewModel.State.Error -> NetworkErrorComposable()
-                    is ConverterViewModel.State.Loaded -> RatesListComposable(state, currencyOrAmountChanged)
+                    is ConverterScreenState.Loading -> GenericLoadingIndicatorComposable()
+                    is ConverterScreenState.Error -> NetworkErrorComposable()
+                    is ConverterScreenState.Loaded -> RatesListComposable(state, currencyOrAmountChanged)
                 }
             }
         })
@@ -85,7 +85,7 @@ internal fun ConverterScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RatesListComposable(
-    state: ConverterViewModel.State.Loaded,
+    state: ConverterScreenState.Loaded,
     currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit
 ) {
     LazyColumn {
@@ -220,7 +220,7 @@ internal fun ConverterTheme(content: @Composable () -> Unit) {
 fun ConverterScreenPreview() {
     ConverterTheme {
         ConverterScreen(
-            ConverterViewModel.State.Loaded(
+            ConverterScreenState.Loaded(
                 listOf(
                     CurrencyRateViewData("RUB", "900.50"),
                     CurrencyRateViewData("USD", "1"),
