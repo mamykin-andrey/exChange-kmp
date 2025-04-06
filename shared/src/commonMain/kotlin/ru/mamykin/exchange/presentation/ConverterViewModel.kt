@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import ru.mamykin.exchange.internal.Closeable
 import ru.mamykin.exchange.domain.ConverterInteractor
 import ru.mamykin.exchange.domain.RateEntity
+import ru.mamykin.exchange.internal.Closeable
 import ru.mamykin.exchange.logDebug
 import ru.mamykin.exchange.subscribeClosable
 
@@ -20,18 +20,6 @@ class ConverterViewModel(
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var ratesJob: Job? = null
     private var currentCurrency: CurrentCurrencyRate? = null
-
-    @Deprecated("Remove when iOS is migrated")
-    val isLoading = MutableStateFlow(true)
-
-    @Deprecated("Remove when iOS is migrated")
-    val rates = MutableStateFlow<CurrencyRatesViewData?>(null)
-
-    @Deprecated("Remove when iOS is migrated")
-    val error = MutableStateFlow<String?>(null)
-
-    @Deprecated("Remove when iOS is migrated")
-    val currentRateChanged = MutableStateFlow<Unit?>(null)
 
     private val mutableStateFlow = MutableStateFlow<ConverterScreenState>(ConverterScreenState.Loading)
     private val state: ConverterScreenState
@@ -45,26 +33,6 @@ class ConverterViewModel(
     @Suppress("unused")
     fun observeState(onEach: (state: ConverterScreenState) -> Unit): Closeable {
         return stateFlow.subscribeClosable(viewModelScope, onEach)
-    }
-
-    @Suppress("unused")
-    fun observeRates(onEach: (CurrencyRatesViewData?) -> Unit): Closeable {
-        return rates.subscribeClosable(viewModelScope, onEach)
-    }
-
-    @Suppress("unused")
-    fun observeIsLoading(onEach: (Boolean) -> Unit): Closeable {
-        return isLoading.subscribeClosable(viewModelScope, onEach)
-    }
-
-    @Suppress("unused")
-    fun observeError(onEach: (String?) -> Unit): Closeable {
-        return error.subscribeClosable(viewModelScope, onEach)
-    }
-
-    @Suppress("unused")
-    fun observeCurrentRateChanged(onEach: (Unit?) -> Unit): Closeable {
-        return currentRateChanged.subscribeClosable(viewModelScope, onEach)
     }
 
     fun startRatesLoading() {
@@ -89,7 +57,6 @@ class ConverterViewModel(
         currentCurrency: CurrentCurrencyRate?,
         currencyChanged: Boolean,
     ) {
-        isLoading.value = true
         ratesJob?.cancel()
         ratesJob = interactor.getRates(currentCurrency, currencyChanged).onEach {
             onRatesLoaded(it, currentCurrency, currencyChanged)
@@ -103,24 +70,18 @@ class ConverterViewModel(
     ) {
         result.fold(
             onSuccess = {
-                val rateViewData = CurrencyRatesViewData(it, currentCurrency)
-                rates.value = rateViewData
                 mutableStateFlow.value =
-                    ConverterScreenState.Loaded(rateViewData.rates.map {
+                    ConverterScreenState.Loaded(it.map {
                         CurrencyRateViewData.fromDomainModel(
                             it,
                             currentCurrency
                         )
                     })
                 logDebug("ConverterViewModel", "onRatesLoaded: $state")
-                if (currencyChanged) {
-                    currentRateChanged.value = Unit
-                    // TODO: effect
-                }
+                // TODO: current rate changed effect if (currencyChanged)
             },
             onFailure = {
                 mutableStateFlow.value = ConverterScreenState.Error
-                error.value = "Network error, please try again"
                 ratesJob?.cancel() // let the user retry when needed
             },
         )

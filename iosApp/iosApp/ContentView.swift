@@ -1,13 +1,6 @@
 import shared
 import SwiftUI
 
-struct CurrencyRatesViewData : Identifiable {
-    let id: UUID
-    let iconUrl: String
-    let title: String
-    let amountStr: String
-}
-
 struct CurrencyRow: View {
     let iconUrl: String
     let title: String
