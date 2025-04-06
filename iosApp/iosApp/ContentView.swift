@@ -2,14 +2,15 @@ import shared
 import SwiftUI
 
 struct CurrencyRow: View {
-    let iconUrl: String
+    let iconName: String
     let title: String
     @Binding var amountStr: String
     
     var body: some View {
         HStack {
-            Image(systemName: "pencil")
-                .frame(width: 24)
+            iconImage(iconName: iconName)
+                .resizable()
+                .frame(width: 24, height: 24)
                 .padding([.leading, .trailing], 12)
             
             Text(title)
@@ -22,6 +23,14 @@ struct CurrencyRow: View {
                 .frame(maxWidth: 70)
         }
         .padding(.vertical, 4)
+    }
+}
+
+private func iconImage(iconName: String) -> Image {
+    if UIImage(named: iconName) != nil {
+        return Image(iconName)
+    } else {
+        return Image("cur_icon_unknown")
     }
 }
 
@@ -49,7 +58,11 @@ class ConverterViewModelWrapper : ObservableObject {
 
 struct ConverterView: View {
     
-    @StateObject var viewModel = ConverterViewModelWrapper()
+    @StateObject var viewModel: ConverterViewModelWrapper
+    
+    init(viewModel: ConverterViewModelWrapper = ConverterViewModelWrapper()) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
     
     var body: some View {
         Group {
@@ -70,7 +83,8 @@ struct ConverterView: View {
     private func loadedView(rates: [CurrencyRateViewData] = []) -> some View {
         List {
             ForEach(rates, id: \.self) { rate in
-                CurrencyRow(iconUrl: "", title: rate.code, amountStr: .constant(rate.amountStr))
+                let iconName = "cur_icon_\(rate.code.lowercased())"
+                CurrencyRow(iconName: iconName, title: rate.code, amountStr: .constant(rate.amountStr))
             }
         }
         .listStyle(PlainListStyle())
@@ -93,6 +107,19 @@ struct ConverterView: View {
     }
 }
 
+class PreviewConverterViewModelWrapper: ConverterViewModelWrapper {
+    override init() {
+        super.init()
+        self.state = ConverterScreenState.Loaded(rates: [
+            CurrencyRateViewData(code: "USD", amountStr: "1.23", cursorPosition: nil),
+            CurrencyRateViewData(code: "EUR", amountStr: "0.95", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY", amountStr: "110.0", cursorPosition: nil)
+        ])
+    }
+    override func startObserving() { }
+    override func stopObserving() { }
+}
+
 #Preview {
-    ConverterView()
+    ConverterView(viewModel: PreviewConverterViewModelWrapper())
 }
