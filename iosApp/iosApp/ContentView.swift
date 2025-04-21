@@ -113,7 +113,6 @@ class ConverterViewModelWrapper : ObservableObject {
 
 struct ConverterView: View {
     @StateObject var viewModel: ConverterViewModelWrapper
-    @Environment(\.presentationMode) private var presentationMode
     
     init(viewModel: ConverterViewModelWrapper = ConverterViewModelWrapper()) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -130,19 +129,8 @@ struct ConverterView: View {
                     errorView()
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("Rates & Conversions")
-                        .font(.headline)
-                }
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.primary)
-                    }
-                }
-            }
+            .navigationTitle("Rates & Conversions")
+            .navigationBarTitleDisplayMode(.large)
         }
         .onAppear {
             viewModel.startObserving()
@@ -154,7 +142,7 @@ struct ConverterView: View {
     
     private func loadedView(rates: [CurrencyRateViewData]) -> some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                 ForEach(rates, id: \.code) { rate in
                     CurrencyRow(viewData: rate) { updatedRate in
                         viewModel.onCurrencyOrAmountChanged(rate: updatedRate)
@@ -164,22 +152,29 @@ struct ConverterView: View {
             }
         }
         .background(Color(.systemGroupedBackground))
+        .frame(maxHeight: .infinity, alignment: .top)
     }
     
     private func loadingView() -> some View {
-        ProgressView("Loading...")
-            .padding()
+        VStack {
+            ProgressView("Loading...")
+                .padding()
+            Spacer()
+        }
     }
     
     private func errorView() -> some View {
         VStack {
-            Text("Error")
-                .font(.headline)
-                .foregroundColor(.red)
-            Text("Please try again later")
-                .foregroundColor(.gray)
+            VStack {
+                Text("Error")
+                    .font(.headline)
+                    .foregroundColor(.red)
+                Text("Please try again later")
+                    .foregroundColor(.gray)
+            }
+            .padding()
+            Spacer()
         }
-        .padding()
     }
 }
 
