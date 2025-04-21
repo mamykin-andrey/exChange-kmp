@@ -45,7 +45,7 @@ class ConverterViewModel(
     }
 
     fun onCurrencyOrAmountChanged(currencyRate: CurrentCurrencyRate) {
-        currencyRate.amountStr.toFloatOrNull() ?: return
+        currencyRate.amountStr.replace(",", ".").toFloatOrNull() ?: return
         if (currencyRate.code == currentCurrency?.code && currencyRate.amountStr == currentCurrency?.amountStr) return
 
         val currencyChanged = currencyRate.code != currentCurrency?.code

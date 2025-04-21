@@ -16,11 +16,8 @@ struct CurrencyRow: View {
     }
     
     var body: some View {
-        HStack(alignment: .center) {
-            Image(viewData.code.lowercased())
-                .resizable()
-                .frame(width: 36, height: 36)
-                .padding(4)
+        HStack(alignment: .top) {
+            iconImage(currencyCode: viewData.code).resizable().frame(width: 32, height: 32).padding(4)
             
             Text(viewData.code)
                 .font(.body)
@@ -75,7 +72,8 @@ struct CurrencyRow: View {
     }
 }
 
-private func iconImage(iconName: String) -> Image {
+private func iconImage(currencyCode: String) -> Image {
+    let iconName = "cur_icon_\(currencyCode.lowercased())"
     if UIImage(named: iconName) != nil {
         return Image(iconName)
     } else {
