@@ -1,7 +1,10 @@
 💱 KMP Currency Exchange App
 A Kotlin Multiplatform (KMP) showcase application that fetches currency exchange rates from https://exchangeratesapi.io and calculates exchange rates based on a selected currency.
 
-<p align="center"> <img src="android_main.gif" alt="App UI" width="300"/> </p>
+| Platform | UI |
+|----------|------------|
+| Android  | <img src="android_main.gif" alt="Android UI" width="300"/> |
+| iOS      | <img src="ios_main.gif" alt="iOS UI" width="300"/> |
 
 🧱 Tech Stack
 
@@ -10,7 +13,7 @@ A Kotlin Multiplatform (KMP) showcase application that fetches currency exchange
 - Kotlin Coroutines + Flow
 - Koin
 - Clean Architecture + MVVM
-- Swift UI (iOS) (WIP) + Jetpack Compose (Android)
+- Swift UI (iOS) + Jetpack Compose (Android)
 
 🚀 Getting Started
 
