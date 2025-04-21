@@ -77,10 +77,11 @@ class ConverterViewModel(
                             currentCurrency
                         )
                     })
-                logDebug("ConverterViewModel", "onRatesLoaded: $state")
+                logDebug("ConverterViewModel", "onRatesLoaded: $it")
                 // TODO: current rate changed effect if (currencyChanged)
             },
             onFailure = {
+                logDebug("ConverterViewModel", "onRatesFailed: $it")
                 mutableStateFlow.value = ConverterScreenState.Error
                 ratesJob?.cancel() // let the user retry when needed
             },

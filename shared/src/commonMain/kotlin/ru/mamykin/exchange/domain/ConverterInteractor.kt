@@ -30,7 +30,7 @@ class ConverterInteractor(
             val calculatedRates = calculateExchangeRate(
                 rates,
                 baseCurrency?.code,
-                baseCurrency?.amountStr?.toFloat(),
+                baseCurrency?.amountStr?.replace(",", ".")?.toFloat(),
             )
             val sortedRates = moveCurrentCurrencyToTop(calculatedRates, baseCurrency?.code)
             emit(Result.success(sortedRates))

@@ -40,6 +40,11 @@ struct CurrencyRow: View {
                         notifyChange(newValue, sendCursorPosition: false)
                     }
                 }
+                .onChange(of: viewData.amountStr) { newValue in
+                    if !isFocused {
+                        text = newValue
+                    }
+                }
         }
         .padding(16)
         .background(Color(.systemBackground))
