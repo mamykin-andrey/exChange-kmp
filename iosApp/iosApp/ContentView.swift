@@ -2,27 +2,76 @@ import shared
 import SwiftUI
 
 struct CurrencyRow: View {
-    let iconName: String
-    let title: String
-    @Binding var amountStr: String
+    let viewData: CurrencyRateViewData
+    let onCurrencyOrAmountChanged: (CurrentCurrencyRate) -> Void
+
+    @State private var text: String
+    @FocusState private var isFocused: Bool
+
+    init(viewData: CurrencyRateViewData,
+         onCurrencyOrAmountChanged: @escaping (CurrentCurrencyRate) -> Void) {
+        self.viewData = viewData
+        self.onCurrencyOrAmountChanged = onCurrencyOrAmountChanged
+        _text = State(initialValue: viewData.amountStr)
+    }
     
     var body: some View {
-        HStack {
-            iconImage(iconName: iconName)
-                .resizable()
-                .frame(width: 24, height: 24)
-                .padding([.leading, .trailing], 12)
-            
-            Text(title)
-                .frame(minWidth: 80, alignment: .leading)
-            
-            Spacer()
-            
-            TextField("Enter value", text: $amountStr)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(maxWidth: 70)
+        Button(action: {
+            isFocused = true
+            notifyChange(text)
+        }) {
+            HStack(alignment: .center) {
+                Image(viewData.code.lowercased())
+                    .resizable()
+                    .frame(width: 36, height: 36)
+                    .padding(4)
+                
+                Text(viewData.code)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                TextField("0", text: $text)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 90)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .focused($isFocused)
+                    .onChange(of: text) { newValue in
+                        if isFocused {
+                            notifyChange(newValue)
+                        }
+                    }
+            }
+            .padding(16)
+            .background(Color(.systemBackground))
         }
-        .padding(.vertical, 4)
+        .buttonStyle(PlainButtonStyle())
+        .onChange(of: viewData.amountStr) { newAmount in
+            if !isFocused && newAmount != text {
+                text = newAmount
+            }
+        }
+        .onAppear {
+            if viewData.cursorPosition != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    isFocused = true
+                }
+            }
+        }
+    }
+    
+    private func notifyChange(_ newValue: String) {
+        if !newValue.isEmpty {
+            onCurrencyOrAmountChanged(
+                CurrentCurrencyRate(
+                    code: viewData.code,
+                    amountStr: newValue,
+                    cursorPosition: isFocused ? 0 : nil
+                )
+            )
+        }
     }
 }
 
@@ -54,40 +103,67 @@ class ConverterViewModelWrapper : ObservableObject {
         observers.forEach({ $0.onClose() })
         observers = []
     }
+    
+    func onCurrencyOrAmountChanged(
+        rate: CurrentCurrencyRate
+    ) {
+        viewModel.onCurrencyOrAmountChanged(currencyRate: rate)
+    }
 }
 
 struct ConverterView: View {
-    
     @StateObject var viewModel: ConverterViewModelWrapper
+    @Environment(\.presentationMode) private var presentationMode
     
     init(viewModel: ConverterViewModelWrapper = ConverterViewModelWrapper()) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
-        Group {
-            if viewModel.state is ConverterScreenState.Loading {
-                loadingView()
-            } else if let loadedState = viewModel.state as? ConverterScreenState.Loaded {
-                loadedView(rates: loadedState.rates)
-            } else if viewModel.state is ConverterScreenState.Error {
-                errorView()
+        NavigationView {
+            Group {
+                if viewModel.state is ConverterScreenState.Loading {
+                    loadingView()
+                } else if let loadedState = viewModel.state as? ConverterScreenState.Loaded {
+                    loadedView(rates: loadedState.rates)
+                } else if viewModel.state is ConverterScreenState.Error {
+                    errorView()
+                }
             }
-        }.onAppear {
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Rates & Conversions")
+                        .font(.headline)
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+        }
+        .onAppear {
             viewModel.startObserving()
-        }.onDisappear {
+        }
+        .onDisappear {
             viewModel.stopObserving()
         }
     }
     
-    private func loadedView(rates: [CurrencyRateViewData] = []) -> some View {
-        List {
-            ForEach(rates, id: \.self) { rate in
-                let iconName = "cur_icon_\(rate.code.lowercased())"
-                CurrencyRow(iconName: iconName, title: rate.code, amountStr: .constant(rate.amountStr))
+    private func loadedView(rates: [CurrencyRateViewData]) -> some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(rates, id: \.code) { rate in
+                    CurrencyRow(viewData: rate) { updatedRate in
+                        viewModel.onCurrencyOrAmountChanged(rate: updatedRate)
+                    }
+                    .transition(.opacity)
+                }
             }
         }
-        .listStyle(PlainListStyle())
+        .background(Color(.systemGroupedBackground))
     }
     
     private func loadingView() -> some View {

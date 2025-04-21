@@ -18,7 +18,11 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
-    )
+    ).forEach {
+        it.compilations.configureEach {
+            kotlinOptions.freeCompilerArgs += "-Xoverride-konan-properties=osVersionMin=15.0"
+        }
+    }
 
     sourceSets {
         androidMain.dependencies {
