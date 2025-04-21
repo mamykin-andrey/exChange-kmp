@@ -16,41 +16,43 @@ struct CurrencyRow: View {
     }
     
     var body: some View {
-        Button(action: {
-            isFocused = true
-            notifyChange(text)
-        }) {
-            HStack(alignment: .center) {
-                Image(viewData.code.lowercased())
-                    .resizable()
-                    .frame(width: 36, height: 36)
-                    .padding(4)
-                
-                Text(viewData.code)
-                    .font(.body)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                TextField("0", text: $text)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 90)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .focused($isFocused)
-                    .onChange(of: text) { newValue in
-                        if isFocused {
-                            notifyChange(newValue)
-                        }
+        HStack(alignment: .center) {
+            Image(viewData.code.lowercased())
+                .resizable()
+                .frame(width: 36, height: 36)
+                .padding(4)
+            
+            Text(viewData.code)
+                .font(.body)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            TextField("0", text: $text)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 90)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .focused($isFocused)
+                .onTapGesture {
+                    isFocused = true
+                    notifyChange(text, sendCursorPosition: true)
+                }
+                .onChange(of: text) { newValue in
+                    if isFocused {
+                        notifyChange(newValue, sendCursorPosition: false)
                     }
-            }
-            .padding(16)
-            .background(Color(.systemBackground))
+                }
         }
-        .buttonStyle(PlainButtonStyle())
-        .onChange(of: viewData.amountStr) { newAmount in
-            if !isFocused && newAmount != text {
-                text = newAmount
+        .padding(16)
+        .background(Color(.systemBackground))
+        .onTapGesture {
+            isFocused = true
+            notifyChange(text, sendCursorPosition: true)
+        }
+        .onChange(of: isFocused) { newValue in
+            if newValue {
+                notifyChange(text, sendCursorPosition: true)
             }
         }
         .onAppear {
@@ -62,16 +64,14 @@ struct CurrencyRow: View {
         }
     }
     
-    private func notifyChange(_ newValue: String) {
-        if !newValue.isEmpty {
-            onCurrencyOrAmountChanged(
-                CurrentCurrencyRate(
-                    code: viewData.code,
-                    amountStr: newValue,
-                    cursorPosition: isFocused ? 0 : nil
-                )
+    private func notifyChange(_ newValue: String, sendCursorPosition: Bool) {
+        onCurrencyOrAmountChanged(
+            CurrentCurrencyRate(
+                code: viewData.code,
+                amountStr: newValue.isEmpty ? "0" : newValue,
+                cursorPosition: sendCursorPosition ? 0 : nil
             )
-        }
+        )
     }
 }
 
@@ -153,6 +153,7 @@ struct ConverterView: View {
         }
         .background(Color(.systemGroupedBackground))
         .frame(maxHeight: .infinity, alignment: .top)
+        .animation(.easeInOut(duration: 0.3), value: rates)
     }
     
     private func loadingView() -> some View {

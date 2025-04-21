@@ -3,9 +3,9 @@ package ru.mamykin.exchange.domain
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ru.mamykin.exchange.internal.VisibleForTesting
 import ru.mamykin.exchange.catchSafely
 import ru.mamykin.exchange.data.RatesRepository
+import ru.mamykin.exchange.internal.VisibleForTesting
 import ru.mamykin.exchange.presentation.CurrentCurrencyRate
 
 class ConverterInteractor(
@@ -13,7 +13,7 @@ class ConverterInteractor(
 ) {
     companion object {
         @VisibleForTesting
-        const val EXCHANGE_UPDATE_PERIOD_MS = 30_000L
+        const val EXCHANGE_UPDATE_PERIOD_MS = 300_000L
         private const val API_BASE_CURRENCY_CODE = "EUR" // limitations of the API free plan
     }
 
