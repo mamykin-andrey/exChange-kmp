@@ -1,6 +1,5 @@
 package ru.mamykin.exchange.presentation
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -33,11 +33,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -46,7 +44,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -55,10 +52,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.onEach
 import ru.mamykin.exchange.R
 import ru.mamykin.exchange.core.getDrawableResId
 
@@ -76,7 +72,8 @@ internal fun ConverterScreen(
         effectFlow.collect { effect ->
             when (effect) {
                 is ConverterScreenEffect.CurrentRateChanged -> {
-                    listState.animateScrollToItem(0)
+                    delay(300)
+                    listState.scrollToItem(0)
                 }
             }
         }
@@ -112,26 +109,15 @@ private fun RatesListComposable(
     currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
     listState: LazyListState,
 ) {
-    val recompositionCount = remember { mutableIntStateOf(0) }
-    LaunchedEffect(Unit) {
-        snapshotFlow { recompositionCount.intValue }
-            .distinctUntilChanged()
-            .onEach { count ->
-                Log.d("Performance", "RatesListComposable recomposed $count times")
-            }
-            .collect {}
-    }
-    recompositionCount.intValue++
+    TrackRecompositions("RatesListComposable")
 
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.onGloballyPositioned {
-            Log.d("Performance", "LazyColumn layout time: ${System.currentTimeMillis()}")
-        }
-    ) {
-        items(state.rates.size, key = { state.rates[it].code }) {
+    LazyColumn(state = listState) {
+        itemsIndexed(
+            items = state.rates,
+            key = { _, item -> item.code }
+        ) { _, item ->
             CurrencyListItemComposable(
-                state.rates[it],
+                item,
                 currencyOrAmountChanged,
                 Modifier.animateItemPlacement(),
             )
@@ -145,16 +131,7 @@ private fun CurrencyListItemComposable(
     onCurrencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val recompositionCount = remember { mutableIntStateOf(0) }
-    LaunchedEffect(Unit) {
-        snapshotFlow { recompositionCount.intValue }
-            .distinctUntilChanged()
-            .onEach { count ->
-                Log.d("Performance", "CurrencyListItemComposable for ${viewData.code} recomposed $count times")
-            }
-            .collect {}
-    }
-    recompositionCount.intValue++
+    TrackRecompositions("CurrencyListItemComposable", viewData.code)
 
     var isFocused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
