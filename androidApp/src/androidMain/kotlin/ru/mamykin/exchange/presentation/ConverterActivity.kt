@@ -18,7 +18,12 @@ internal class ConverterActivity : AppCompatActivity() {
         setContent {
             ConverterTheme {
                 val state by viewModel.stateFlow.collectAsState()
-                ConverterScreen(state, viewModel::onCurrencyOrAmountChanged) { finish() }
+                ConverterScreen(
+                    state = state,
+                    currencyOrAmountChanged = viewModel::onCurrencyOrAmountChanged,
+                    onCloseClicked = { finish() },
+                    effectFlow = viewModel.effectFlow
+                )
             }
         }
     }

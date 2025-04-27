@@ -4,8 +4,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.mamykin.exchange.domain.ConverterInteractor
@@ -26,9 +29,16 @@ class ConverterViewModel(
         get() = mutableStateFlow.value
     val stateFlow: StateFlow<ConverterScreenState> = mutableStateFlow
 
-    // sealed class Effect {
-    //     data object CurrentRateChanged : Effect()
-    // }
+    private val mutableEffectFlow = MutableSharedFlow<ConverterScreenEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val effectFlow = mutableEffectFlow.asSharedFlow()
+
+    @Suppress("unused")
+    fun observeEffect(onEach: (effect: ConverterScreenEffect) -> Unit): Closeable {
+        return effectFlow.subscribeClosable(viewModelScope, onEach)
+    }
 
     @Suppress("unused")
     fun observeState(onEach: (state: ConverterScreenState) -> Unit): Closeable {
@@ -70,6 +80,7 @@ class ConverterViewModel(
     ) {
         result.fold(
             onSuccess = {
+                logDebug("ConverterViewModel", "onRatesLoaded: $it")
                 mutableStateFlow.value =
                     ConverterScreenState.Loaded(it.map {
                         CurrencyRateViewData.fromDomainModel(
@@ -77,8 +88,9 @@ class ConverterViewModel(
                             currentCurrency
                         )
                     })
-                logDebug("ConverterViewModel", "onRatesLoaded: $it")
-                // TODO: current rate changed effect if (currencyChanged)
+                if (currencyChanged) {
+                    mutableEffectFlow.tryEmit(ConverterScreenEffect.CurrentRateChanged)
+                }
             },
             onFailure = {
                 logDebug("ConverterViewModel", "onRatesFailed: $it")
@@ -87,6 +99,10 @@ class ConverterViewModel(
             },
         )
     }
+}
+
+sealed class ConverterScreenEffect {
+    data object CurrentRateChanged : ConverterScreenEffect()
 }
 
 sealed class ConverterScreenState {

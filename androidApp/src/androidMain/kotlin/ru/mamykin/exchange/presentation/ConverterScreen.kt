@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -49,6 +51,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import ru.mamykin.exchange.R
 import ru.mamykin.exchange.core.getDrawableResId
 
@@ -58,7 +62,20 @@ internal fun ConverterScreen(
     state: ConverterScreenState,
     currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
     onCloseClicked: () -> Unit,
+    effectFlow: Flow<ConverterScreenEffect>,
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(effectFlow) {
+        effectFlow.collect { effect ->
+            when (effect) {
+                is ConverterScreenEffect.CurrentRateChanged -> {
+                    listState.animateScrollToItem(0)
+                }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,7 +93,7 @@ internal fun ConverterScreen(
                 when (state) {
                     is ConverterScreenState.Loading -> GenericLoadingIndicatorComposable()
                     is ConverterScreenState.Error -> NetworkErrorComposable()
-                    is ConverterScreenState.Loaded -> RatesListComposable(state, currencyOrAmountChanged)
+                    is ConverterScreenState.Loaded -> RatesListComposable(state, currencyOrAmountChanged, listState)
                 }
             }
         })
@@ -86,9 +103,10 @@ internal fun ConverterScreen(
 @Composable
 private fun RatesListComposable(
     state: ConverterScreenState.Loaded,
-    currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit
+    currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
+    listState: LazyListState,
 ) {
-    LazyColumn {
+    LazyColumn(state = listState) {
         items(state.rates.size, key = { state.rates[it].code }) {
             CurrencyListItemComposable(
                 state.rates[it],
@@ -220,12 +238,15 @@ internal fun ConverterTheme(content: @Composable () -> Unit) {
 fun ConverterScreenPreview() {
     ConverterTheme {
         ConverterScreen(
-            ConverterScreenState.Loaded(
+            state = ConverterScreenState.Loaded(
                 listOf(
                     CurrencyRateViewData("RUB", "900.50"),
                     CurrencyRateViewData("USD", "1"),
                 )
             ),
-            {}, {})
+            currencyOrAmountChanged = {},
+            onCloseClicked = {},
+            effectFlow = emptyFlow(),
+        )
     }
 }
