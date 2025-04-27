@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -27,7 +28,6 @@ kotlin {
             implementation(libs.androidx.material3)
             implementation(libs.koin.core)
             implementation(libs.koin.android)
-            implementation("com.squareup.picasso:picasso:2.71828")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -56,6 +56,22 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+
+    signingConfigs {
+        create("release") {
+            val keystoreProperties = Properties()
+            val keystorePropertiesFile = rootProject.file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                keystoreProperties.load(keystorePropertiesFile.inputStream())
+            }
+
+            storeFile = file(keystoreProperties.getProperty("storeFile") ?: "debug.keystore")
+            storePassword = keystoreProperties.getProperty("storePassword") ?: "android"
+            keyAlias = keystoreProperties.getProperty("keyAlias") ?: "androiddebugkey"
+            keyPassword = keystoreProperties.getProperty("keyPassword") ?: "android"
+        }
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -65,6 +81,15 @@ android {
         getByName("debug") {
             isMinifyEnabled = false
         }
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -73,6 +98,10 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    compose {
+        kotlinCompilerPlugin.set("1.5.8")
+        kotlinCompilerPluginArgs.add("suppressKotlinVersionCompatibilityCheck=1.9.0")
     }
     dependencies {
         debugImplementation(compose.uiTooling)

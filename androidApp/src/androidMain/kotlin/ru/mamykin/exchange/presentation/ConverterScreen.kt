@@ -1,5 +1,6 @@
 package ru.mamykin.exchange.presentation
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -32,9 +33,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -43,6 +46,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -52,7 +56,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.onEach
 import ru.mamykin.exchange.R
 import ru.mamykin.exchange.core.getDrawableResId
 
@@ -106,7 +112,23 @@ private fun RatesListComposable(
     currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
     listState: LazyListState,
 ) {
-    LazyColumn(state = listState) {
+    val recompositionCount = remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        snapshotFlow { recompositionCount.intValue }
+            .distinctUntilChanged()
+            .onEach { count ->
+                Log.d("Performance", "RatesListComposable recomposed $count times")
+            }
+            .collect {}
+    }
+    recompositionCount.intValue++
+
+    LazyColumn(
+        state = listState,
+        modifier = Modifier.onGloballyPositioned {
+            Log.d("Performance", "LazyColumn layout time: ${System.currentTimeMillis()}")
+        }
+    ) {
         items(state.rates.size, key = { state.rates[it].code }) {
             CurrencyListItemComposable(
                 state.rates[it],
@@ -123,7 +145,23 @@ private fun CurrencyListItemComposable(
     onCurrencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val recompositionCount = remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        snapshotFlow { recompositionCount.intValue }
+            .distinctUntilChanged()
+            .onEach { count ->
+                Log.d("Performance", "CurrencyListItemComposable for ${viewData.code} recomposed $count times")
+            }
+            .collect {}
+    }
+    recompositionCount.intValue++
+
     var isFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    var textFieldValue by remember(viewData.amountStr) {
+        mutableStateOf(TextFieldValue(text = viewData.amountStr))
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -149,13 +187,6 @@ private fun CurrencyListItemComposable(
             modifier = Modifier.weight(1f)
         )
 
-        val focusRequester = remember { FocusRequester() }
-        var textFieldValue by remember { mutableStateOf(TextFieldValue(text = viewData.amountStr)) }
-        LaunchedEffect(viewData.amountStr) {
-            if (!isFocused && viewData.amountStr != textFieldValue.text) {
-                textFieldValue = textFieldValue.copy(text = viewData.amountStr)
-            }
-        }
         TextField(
             value = textFieldValue,
             onValueChange = { newValue ->
@@ -193,7 +224,9 @@ private fun CurrencyListItemComposable(
                 }
         )
         if (viewData.cursorPosition != null) {
-            focusRequester.requestFocus()
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
+            }
         }
     }
 }
