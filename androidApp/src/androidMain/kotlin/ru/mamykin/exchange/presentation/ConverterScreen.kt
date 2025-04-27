@@ -1,5 +1,6 @@
 package ru.mamykin.exchange.presentation
 
+import android.app.Activity
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -45,6 +46,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -68,7 +70,6 @@ internal fun ConverterScreen(
     navController: NavController,
     state: ConverterScreenState,
     onIntent: (ConverterScreenIntent) -> Unit,
-    onCloseClicked: () -> Unit,
     effectFlow: Flow<ConverterScreenEffect>,
 ) {
     val listState = rememberLazyListState()
@@ -90,12 +91,13 @@ internal fun ConverterScreen(
 
     Scaffold(
         topBar = {
+            val activity = (LocalContext.current as? Activity)
             TopAppBar(
                 title = {
                     Text(text = stringResource(R.string.rates_and_conversions_title))
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onCloseClicked() }) {
+                    IconButton(onClick = { activity?.finish() }) {
                         Icon(Icons.Filled.Close, "")
                     }
                 },
@@ -274,7 +276,6 @@ fun ConverterScreenPreview() {
                 )
             ),
             onIntent = {},
-            onCloseClicked = {},
             effectFlow = emptyFlow(),
         )
     }

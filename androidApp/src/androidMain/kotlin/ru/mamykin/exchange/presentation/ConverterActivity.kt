@@ -24,7 +24,6 @@ internal class ConverterActivity : AppCompatActivity() {
                 AppNavigation(
                     state = state,
                     onIntent = viewModel::onIntent,
-                    onCloseClicked = { finish() },
                     effectFlow = viewModel.effectFlow,
                 )
                 // { isDarkTheme.value = it }

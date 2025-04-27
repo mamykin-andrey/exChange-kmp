@@ -18,7 +18,6 @@ import ru.mamykin.exchange.presentation.ConverterScreenState
 fun AppNavigation(
     state: ConverterScreenState,
     onIntent: (ConverterScreenIntent) -> Unit,
-    onCloseClicked: () -> Unit,
     effectFlow: Flow<ConverterScreenEffect>,
 ) {
     val navController = rememberNavController()
@@ -36,7 +35,6 @@ fun AppNavigation(
                 navController = navController,
                 state = state,
                 onIntent = onIntent,
-                onCloseClicked = onCloseClicked,
                 effectFlow = effectFlow,
             )
         }
