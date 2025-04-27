@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,17 +53,21 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import ru.mamykin.exchange.AppScreen
 import ru.mamykin.exchange.R
 import ru.mamykin.exchange.core.getDrawableResId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ConverterScreen(
+    navController: NavController,
     state: ConverterScreenState,
-    currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
+    onIntent: (ConverterScreenIntent) -> Unit,
     onCloseClicked: () -> Unit,
     effectFlow: Flow<ConverterScreenEffect>,
 ) {
@@ -74,6 +79,10 @@ internal fun ConverterScreen(
                 is ConverterScreenEffect.CurrentRateChanged -> {
                     delay(300)
                     listState.scrollToItem(0)
+                }
+
+                is ConverterScreenEffect.NavigateToInfo -> {
+                    navController.navigate(AppScreen.AppInfo.route)
                 }
             }
         }
@@ -89,6 +98,11 @@ internal fun ConverterScreen(
                     IconButton(onClick = { onCloseClicked() }) {
                         Icon(Icons.Filled.Close, "")
                     }
+                },
+                actions = {
+                    IconButton(onClick = { onIntent(ConverterScreenIntent.InfoButtonClicked) }) {
+                        Icon(Icons.Filled.Info, "")
+                    }
                 }
             )
         }, content = { innerPadding ->
@@ -96,7 +110,7 @@ internal fun ConverterScreen(
                 when (state) {
                     is ConverterScreenState.Loading -> GenericLoadingIndicatorComposable()
                     is ConverterScreenState.Error -> NetworkErrorComposable()
-                    is ConverterScreenState.Loaded -> RatesListComposable(state, currencyOrAmountChanged, listState)
+                    is ConverterScreenState.Loaded -> RatesListComposable(state, onIntent, listState)
                 }
             }
         })
@@ -106,7 +120,7 @@ internal fun ConverterScreen(
 @Composable
 private fun RatesListComposable(
     state: ConverterScreenState.Loaded,
-    currencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
+    onIntent: (ConverterScreenIntent) -> Unit,
     listState: LazyListState,
 ) {
     TrackRecompositions("RatesListComposable")
@@ -118,7 +132,7 @@ private fun RatesListComposable(
         ) { _, item ->
             CurrencyListItemComposable(
                 item,
-                currencyOrAmountChanged,
+                onIntent,
                 Modifier.animateItemPlacement(),
             )
         }
@@ -128,7 +142,7 @@ private fun RatesListComposable(
 @Composable
 private fun CurrencyListItemComposable(
     viewData: CurrencyRateViewData,
-    onCurrencyOrAmountChanged: (CurrentCurrencyRate) -> Unit,
+    onIntent: (ConverterScreenIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     TrackRecompositions("CurrencyListItemComposable", viewData.code)
@@ -169,11 +183,13 @@ private fun CurrencyListItemComposable(
             onValueChange = { newValue ->
                 textFieldValue = newValue
                 if (isFocused && newValue.text != viewData.amountStr && newValue.text.isNotBlank()) {
-                    onCurrencyOrAmountChanged(
-                        CurrentCurrencyRate(
-                            code = viewData.code,
-                            amountStr = newValue.text,
-                            cursorPosition = newValue.selection.end
+                    onIntent(
+                        ConverterScreenIntent.CurrencyOrAmountChanged(
+                            CurrentCurrencyRate(
+                                code = viewData.code,
+                                amountStr = newValue.text,
+                                cursorPosition = newValue.selection.end
+                            )
                         )
                     )
                 }
@@ -190,11 +206,13 @@ private fun CurrencyListItemComposable(
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
                     if (focusState.isFocused) {
-                        onCurrencyOrAmountChanged(
-                            CurrentCurrencyRate(
-                                code = viewData.code,
-                                amountStr = textFieldValue.text,
-                                cursorPosition = textFieldValue.selection.end,
+                        onIntent(
+                            ConverterScreenIntent.CurrencyOrAmountChanged(
+                                CurrentCurrencyRate(
+                                    code = viewData.code,
+                                    amountStr = textFieldValue.text,
+                                    cursorPosition = textFieldValue.selection.end,
+                                )
                             )
                         )
                     }
@@ -248,13 +266,14 @@ internal fun ConverterTheme(content: @Composable () -> Unit) {
 fun ConverterScreenPreview() {
     ConverterTheme {
         ConverterScreen(
+            navController = rememberNavController(),
             state = ConverterScreenState.Loaded(
                 listOf(
                     CurrencyRateViewData("RUB", "900.50"),
                     CurrencyRateViewData("USD", "1"),
                 )
             ),
-            currencyOrAmountChanged = {},
+            onIntent = {},
             onCloseClicked = {},
             effectFlow = emptyFlow(),
         )

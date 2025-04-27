@@ -2,11 +2,12 @@ package ru.mamykin.exchange.presentation
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import org.koin.android.ext.android.inject
-import ru.mamykin.exchange.R
+import ru.mamykin.exchange.AppNavigation
 
 internal class ConverterActivity : AppCompatActivity() {
 
@@ -14,16 +15,19 @@ internal class ConverterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(R.style.AppTheme_NoActionBar)
+        enableEdgeToEdge()
         setContent {
+            // val isDarkTheme = remember { mutableStateOf(appSettingsRepository.isNightThemeEnabled()) }
+            // ConverterTheme(darkTheme = isDarkTheme.value) {
             ConverterTheme {
                 val state by viewModel.stateFlow.collectAsState()
-                ConverterScreen(
+                AppNavigation(
                     state = state,
-                    currencyOrAmountChanged = viewModel::onCurrencyOrAmountChanged,
+                    onIntent = viewModel::onIntent,
                     onCloseClicked = { finish() },
-                    effectFlow = viewModel.effectFlow
+                    effectFlow = viewModel.effectFlow,
                 )
+                // { isDarkTheme.value = it }
             }
         }
     }

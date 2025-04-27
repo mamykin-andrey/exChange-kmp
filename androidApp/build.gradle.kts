@@ -19,6 +19,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.navigation.compose)
             implementation(project(":shared"))
             implementation(libs.androidx.material)
             implementation(platform("androidx.compose:compose-bom:2024.06.00"))
@@ -28,6 +29,7 @@ kotlin {
             implementation(libs.androidx.material3)
             implementation(libs.koin.core)
             implementation(libs.koin.android)
+            implementation("androidx.navigation:navigation-compose:2.7.7")
         }
         commonMain.dependencies {
             implementation(compose.runtime)

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.mamykin.exchange.domain.ConverterInteractor
 import ru.mamykin.exchange.domain.RateEntity
 import ru.mamykin.exchange.internal.Closeable
@@ -54,7 +55,19 @@ class ConverterViewModel(
         ratesJob = null
     }
 
-    fun onCurrencyOrAmountChanged(currencyRate: CurrentCurrencyRate) {
+    fun onIntent(intent: ConverterScreenIntent) = viewModelScope.launch {
+        when (intent) {
+            is ConverterScreenIntent.InfoButtonClicked -> {
+                mutableEffectFlow.emit(ConverterScreenEffect.NavigateToInfo)
+            }
+
+            is ConverterScreenIntent.CurrencyOrAmountChanged -> {
+                onCurrencyOrAmountChanged(intent.currencyRate)
+            }
+        }
+    }
+
+    private fun onCurrencyOrAmountChanged(currencyRate: CurrentCurrencyRate) {
         currencyRate.amountStr.replace(",", ".").toFloatOrNull() ?: return
         if (currencyRate.code == currentCurrency?.code && currencyRate.amountStr == currentCurrency?.amountStr) return
 
@@ -101,8 +114,14 @@ class ConverterViewModel(
     }
 }
 
+sealed class ConverterScreenIntent {
+    data object InfoButtonClicked : ConverterScreenIntent()
+    data class CurrencyOrAmountChanged(val currencyRate: CurrentCurrencyRate) : ConverterScreenIntent()
+}
+
 sealed class ConverterScreenEffect {
     data object CurrentRateChanged : ConverterScreenEffect()
+    data object NavigateToInfo : ConverterScreenEffect()
 }
 
 sealed class ConverterScreenState {
