@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
@@ -14,15 +16,20 @@ internal class RootActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = Color.White.toArgb()
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         setContent {
-            // val isDarkTheme = isSystemInDarkTheme()
-            ConverterTheme {
+            val isDarkTheme = isSystemInDarkTheme()
+            LaunchedEffect(isDarkTheme) {
+                updateStatusBar(isDarkTheme)
+            }
+            ConverterTheme(isDarkTheme) {
                 AppNavigation()
-                // { isDarkTheme.value = it }
             }
         }
+    }
+
+    private fun updateStatusBar(isDarkTheme: Boolean) {
+        val statusBarColor = if (isDarkTheme) Color.Black else Color.White
+        window.statusBarColor = statusBarColor.toArgb()
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDarkTheme
     }
 }

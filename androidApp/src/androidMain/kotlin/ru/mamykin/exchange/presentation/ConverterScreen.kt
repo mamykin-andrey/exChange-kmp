@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,12 +41,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -64,6 +63,11 @@ import kotlinx.coroutines.flow.emptyFlow
 import ru.mamykin.exchange.AppScreen
 import ru.mamykin.exchange.R
 import ru.mamykin.exchange.core.getDrawableResId
+
+// TODO: Move strings to common resources
+// TODO: Add viewmodel for the info screen
+// TODO: Fix app icon and title and splash screen
+// TODO: Fix unit-tests mocking
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -242,17 +246,20 @@ private fun GenericLoadingIndicatorComposable() {
 @Composable
 private fun NetworkErrorComposable(onIntent: (ConverterScreenIntent) -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
     ) {
         Text(
             text = stringResource(id = R.string.error_network),
-            color = Color.Black,
             fontSize = 16.sp,
         )
-        Button(onClick = {
-            onIntent(ConverterScreenIntent.RetryLoading)
-        }) {
+        Button(
+            onClick = {
+                onIntent(ConverterScreenIntent.RetryLoading)
+            },
+            modifier = Modifier.padding(top = 12.dp)
+        ) {
             Text(
                 text = stringResource(R.string.error_retry_title),
             )
@@ -260,27 +267,20 @@ private fun NetworkErrorComposable(onIntent: (ConverterScreenIntent) -> Unit) {
     }
 }
 
-@Composable
-internal fun ConverterTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        content = {
-            content()
-        }
-    )
-}
-
 @Preview
 @Composable
 fun ConverterScreenPreview() {
-    ConverterTheme {
+    ConverterTheme(isNightTheme = true) {
+        // ConverterTheme(isNightTheme = false) {
         ConverterScreen(
             navController = rememberNavController(),
-            state = ConverterScreenState.Loaded(
-                listOf(
-                    CurrencyRateViewData("RUB", "900.50"),
-                    CurrencyRateViewData("USD", "1"),
-                )
-            ),
+            // state = ConverterScreenState.Loaded(
+            //     listOf(
+            //         CurrencyRateViewData("RUB", "900.50"),
+            //         CurrencyRateViewData("USD", "1"),
+            //     )
+            // ),
+            state = ConverterScreenState.Error,
             effectFlow = emptyFlow(),
             onIntent = {},
         )

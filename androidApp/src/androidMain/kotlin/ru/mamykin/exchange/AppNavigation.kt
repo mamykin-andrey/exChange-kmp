@@ -8,18 +8,11 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import org.koin.core.component.KoinComponent
-import org.koin.java.KoinJavaComponent.inject
+import ru.mamykin.exchange.di.KoinHelper
 import ru.mamykin.exchange.presentation.AppInfoScreen
 import ru.mamykin.exchange.presentation.ConverterScreen
-import ru.mamykin.exchange.presentation.ConverterViewModel
-
-private object ViewModelHolder : KoinComponent {
-    val converterViewModel: ConverterViewModel by inject(ConverterViewModel::class.java)
-}
 
 @Composable
-// fun AppNavigation(onNightThemeSwitch: (Boolean) -> Unit) {
 internal fun AppNavigation() {
     val navController = rememberNavController()
     NavHost(
@@ -29,7 +22,7 @@ internal fun AppNavigation() {
         exitTransition = { ExitTransition.None },
     ) {
         composable(route = AppScreen.Main.route) {
-            val viewModel = ViewModelHolder.converterViewModel
+            val viewModel = KoinHelper.getViewModel()
             val state by viewModel.stateFlow.collectAsState()
             ConverterScreen(
                 navController = navController,

@@ -6,7 +6,7 @@ import org.koin.core.context.startKoin
 import ru.mamykin.exchange.presentation.ConverterViewModel
 
 @Suppress("unused")
-class KoinHelper : KoinComponent {
+object KoinHelper : KoinComponent {
     private val injectedViewModel: ConverterViewModel by inject()
 
     fun getViewModel(): ConverterViewModel = injectedViewModel
