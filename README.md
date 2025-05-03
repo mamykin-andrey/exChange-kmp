@@ -1,9 +1,9 @@
 💱 KMP Currency Exchange App
-A Kotlin Multiplatform (KMP) showcase application that fetches currency exchange rates from https://exchangeratesapi.io and calculates exchange rates based on a selected currency.
+A Kotlin Multiplatform (KMP) showcase application that fetches currency exchange rates from https://exchangeratesapi.io and calculates exchange rates based on a selected currency. Supports dark theme and simple navigation on both platforms.
 
-| Android | iOS |
-|---------|-----|
-| <img src="android_main.gif" alt="Android UI" width="300"/> | <img src="ios_main.gif" alt="iOS UI" width="300"/> |
+| UX | Android dark | Android light | iOS dark | iOS light |
+|---|---|---|---|---|
+| <img src="media/anim.gif" alt="1" width="200"/> | <img src="media/android_dark.png" alt="2" width="200"/> | <img src="media/android_light.png" alt="2" width="200"/> | <img src="media/ios_dark.png" alt="2" width="200"/> | <img src="media/ios_light.png" alt="2" width="200"/> |
 
 🧱 Tech Stack
 
@@ -23,11 +23,11 @@ Prerequisites
 
 Setup
 1. Clone the repo:
-`git clone git@github.com:mamykin-andrey/exChange-kmp.git && cd exChange`
+   `git clone git@github.com:mamykin-andrey/exChange-kmp.git && cd exChange`
 2. Add your API key to local.properties as `exchangeapikey=YOUR_KEY`
 3. Run the app:
-3.1 Android: Open the project in Android Studio and run on an emulator or device.
-3.2 iOS: Open the iosApp folder with Xcode and run on a simulator or device.
+   1. **Android:** Open the project in Android Studio and run on an emulator or device.
+   2. **iOS:** Open the iosApp folder with Xcode and run on a simulator or device. **Note:** to run iOS you have to build the iOSApp target in Android Studio first
 
 🧪 Architecture Overview
 
