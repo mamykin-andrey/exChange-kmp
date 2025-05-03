@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		553CFF432DC60CD4000C283C /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 553CFF422DC60CD4000C283C /* InfoView.swift */; };
+		55B51C432DC63B53007A059D /* ConverterViewModelWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B51C422DC63B4C007A059D /* ConverterViewModelWrapper.swift */; };
 		66CD08CE2A407C2900D66EFD /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66CD08CD2A407C2900D66EFD /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ConverterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ConverterView.swift */; };
 		7555FF85242A565B00829871 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7555FF84242A565B00829871 /* Assets.xcassets */; };
@@ -35,6 +36,7 @@
 
 /* Begin PBXFileReference section */
 		553CFF422DC60CD4000C283C /* InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoView.swift; sourceTree = "<group>"; };
+		55B51C422DC63B4C007A059D /* ConverterViewModelWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConverterViewModelWrapper.swift; sourceTree = "<group>"; };
 		66CD08CD2A407C2900D66EFD /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ConverterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConverterView.swift; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				55B51C422DC63B4C007A059D /* ConverterViewModelWrapper.swift */,
 				7555FF82242A565900829871 /* ConverterView.swift */,
 				553CFF422DC60CD4000C283C /* InfoView.swift */,
 				7555FF84242A565B00829871 /* Assets.xcassets */,
@@ -297,6 +300,7 @@
 				7555FF83242A565900829871 /* ConverterView.swift in Sources */,
 				66CD08CE2A407C2900D66EFD /* iOSApp.swift in Sources */,
 				553CFF432DC60CD4000C283C /* InfoView.swift in Sources */,
+				55B51C432DC63B53007A059D /* ConverterViewModelWrapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

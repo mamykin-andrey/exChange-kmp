@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,11 +70,10 @@ import ru.mamykin.exchange.core.getDrawableResId
 internal fun ConverterScreen(
     navController: NavController,
     state: ConverterScreenState,
-    onIntent: (ConverterScreenIntent) -> Unit,
     effectFlow: Flow<ConverterScreenEffect>,
+    onIntent: (ConverterScreenIntent) -> Unit,
 ) {
     val listState = rememberLazyListState()
-
     LaunchedEffect(effectFlow) {
         effectFlow.collect { effect ->
             when (effect) {
@@ -82,6 +82,14 @@ internal fun ConverterScreen(
                     listState.scrollToItem(0)
                 }
             }
+        }
+    }
+    LaunchedEffect(Unit) {
+        onIntent(ConverterScreenIntent.StartLoading)
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            onIntent(ConverterScreenIntent.StopLoading)
         }
     }
 
@@ -273,8 +281,8 @@ fun ConverterScreenPreview() {
                     CurrencyRateViewData("USD", "1"),
                 )
             ),
-            onIntent = {},
             effectFlow = emptyFlow(),
+            onIntent = {},
         )
     }
 }

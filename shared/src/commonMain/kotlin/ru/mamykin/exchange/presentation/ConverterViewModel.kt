@@ -46,25 +46,23 @@ class ConverterViewModel(
         return stateFlow.subscribeClosable(viewModelScope, onEach)
     }
 
-    // TODO: Move to the screen instead of activity
-    fun startRatesLoading() {
-        loadRates(null, true)
-    }
-
-    // TODO: Move to the screen instead of activity
-    fun stopRatesLoading() {
-        ratesJob?.cancel()
-        ratesJob = null
-    }
-
     fun onIntent(intent: ConverterScreenIntent) = viewModelScope.launch {
         when (intent) {
+            is ConverterScreenIntent.StartLoading -> {
+                loadRates(currentCurrency = null, currencyChanged = true)
+            }
+
+            is ConverterScreenIntent.StopLoading -> {
+                ratesJob?.cancel()
+                ratesJob = null
+            }
+
             is ConverterScreenIntent.CurrencyOrAmountChanged -> {
                 onCurrencyOrAmountChanged(intent.currencyRate)
             }
 
             is ConverterScreenIntent.RetryLoading -> {
-                startRatesLoading()
+                loadRates(currentCurrency = null, currencyChanged = true)
             }
         }
     }
@@ -117,6 +115,8 @@ class ConverterViewModel(
 }
 
 sealed class ConverterScreenIntent {
+    data object StartLoading : ConverterScreenIntent()
+    data object StopLoading : ConverterScreenIntent()
     data class CurrencyOrAmountChanged(val currencyRate: CurrentCurrencyRate) : ConverterScreenIntent()
     data object RetryLoading : ConverterScreenIntent()
 }

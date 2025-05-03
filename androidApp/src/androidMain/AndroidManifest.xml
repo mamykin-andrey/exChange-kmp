@@ -18,7 +18,7 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-            android:name=".presentation.ConverterActivity"
+            android:name=".presentation.RootActivity"
             android:exported="true"
             android:theme="@style/AppTheme.Splash">
             <intent-filter>

@@ -86,40 +86,6 @@ private func iconImage(currencyCode: String) -> Image {
     }
 }
 
-class ConverterViewModelWrapper : ObservableObject {
-    private let viewModel: ConverterViewModel
-    @State private var observers: [Closeable] = []
-    @Published var state: ConverterScreenState = ConverterScreenState.Loading()
-    @Published var shouldScrollToTop = false
-    
-    init() {
-        viewModel = KoinHelper().getViewModel()
-    }
-    
-    func startObserving() {
-        observers.append(viewModel.observeState(onEach: { state in
-            self.state = state
-        }))
-        observers.append(viewModel.observeEffect(onEach: { effect in
-            if effect is ConverterScreenEffect.CurrentRateChanged {
-                self.shouldScrollToTop = true
-            }
-        }))
-        viewModel.startRatesLoading()
-    }
-    
-    func stopObserving() {
-        observers.forEach({ $0.onClose() })
-        observers = []
-    }
-    
-    func onIntent(
-        intent: ConverterScreenIntent
-    ) {
-        viewModel.onIntent(intent: intent)
-    }
-}
-
 struct ConverterView: View {
     @StateObject var viewModel: ConverterViewModelWrapper
     @State private var showingInfo = false
@@ -157,9 +123,10 @@ struct ConverterView: View {
         }
         .onAppear {
             viewModel.startObserving()
+            viewModel.onIntent(intent: ConverterScreenIntent.StartLoading())
         }
         .onDisappear {
-            viewModel.stopObserving()
+            viewModel.onIntent(intent: ConverterScreenIntent.StopLoading())
         }
         .onChange(of: viewModel.shouldScrollToTop) { newValue in
             if newValue, let proxy = scrollProxy, let firstRate = (viewModel.state as? ConverterScreenState.Loaded)?.rates.first {
