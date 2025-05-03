@@ -16,6 +16,7 @@ struct SampleApp: App {
     var body: some Scene {
         WindowGroup {
             ConverterView()
+                .statusBar(hidden: false)
         }
     }
 }

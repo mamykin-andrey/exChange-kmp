@@ -2,49 +2,8 @@
     <string name="app_name">exChange</string>
     <string name="desc_currency_icon">Currency icon</string>
     <string name="zero_amount" translatable="false">0</string>
-    <string name="alerts_screen_title">Alerts Screen</string>
-    <string name="rates_screen_title">Rates Screen</string>
     <string name="rates_and_conversions_title">Rates &amp; conversions</string>
     <string name="about_title">About</string>
-    <string name="rates_tab_title">Rates</string>
-    <string name="converter_tab_title">Converter</string>
-    <string name="alerts_tab_title">Alerts</string>
-    <!-- CURRENCY NAMES -->
-    <string name="currency_name_aud">Australian Dollar</string>
-    <string name="currency_name_bgn">Bulgarian Lev</string>
-    <string name="currency_name_brl">Brazilian Real</string>
-    <string name="currency_name_cad">Canadian Dollar</string>
-    <string name="currency_name_chf">Swiss Franc</string>
-    <string name="currency_name_cny">Yuan Renminbi</string>
-    <string name="currency_name_czk">Czech Koruna</string>
-    <string name="currency_name_dkk">Danish Krone</string>
-    <string name="currency_name_eur">Euro</string>
-    <string name="currency_name_gbp">Pound Sterling</string>
-    <string name="currency_name_hkd">Hong Kong Dollar</string>
-    <string name="currency_name_hrk">Kuna</string>
-    <string name="currency_name_huf">Forint</string>
-    <string name="currency_name_idr">Rupiah</string>
-    <string name="currency_name_ils">New Israeli Sheqel</string>
-    <string name="currency_name_inr">Indian Rupee</string>
-    <string name="currency_name_isk">Iceland Krona</string>
-    <string name="currency_name_jpy">Yen</string>
-    <string name="currency_name_krw">Won</string>
-    <string name="currency_name_mxn">Mexican Peso</string>
-    <string name="currency_name_myr">Malaysian Ringgit</string>
-    <string name="currency_name_nok">Norwegian Krone</string>
-    <string name="currency_name_nzd">New Zealand Dollar</string>
-    <string name="currency_name_php">Philippine Peso</string>
-    <string name="currency_name_pln">Zloty</string>
-    <string name="currency_name_ron">Romanian Leu</string>
-    <string name="currency_name_rub">Russian Ruble</string>
-    <string name="currency_name_sek">Swedish Krona</string>
-    <string name="currency_name_sgd">Singapore Dollar</string>
-    <string name="currency_name_thb">Baht</string>
-    <string name="currency_name_try">Turkish Lira</string>
-    <string name="currency_name_usd">US Dollar</string>
-    <string name="currency_name_zar">Rand</string>
-    <string name="currency_name_unknown">Unknown</string>
-    <!-- END CURRENCY NAMES -->
     <string name="error_network">Unable to load data, please try again</string>
     <string name="error_retry_title">Retry</string>
 </resources>

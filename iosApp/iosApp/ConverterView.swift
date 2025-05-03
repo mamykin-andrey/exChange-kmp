@@ -107,7 +107,6 @@ struct ConverterView: View {
                 }
             }
             .navigationTitle("Rates & Conversions")
-            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -162,6 +161,7 @@ struct ConverterView: View {
     
     private func loadingView() -> some View {
         VStack {
+            Spacer()
             ProgressView("Loading...")
                 .padding()
             Spacer()
@@ -170,20 +170,16 @@ struct ConverterView: View {
     
     private func errorView() -> some View {
         VStack {
-            VStack {
-                Text("Error")
-                    .font(.headline)
-                    .foregroundColor(.red)
-                Text("Please try again later")
-                    .foregroundColor(.gray)
+            Spacer()
+                Text("Unable to load data, please try again")
+                .font(.body)
+                .padding()
                 Button(action: {
                     viewModel.onIntent(intent: ConverterScreenIntent.RetryLoading())
                 }) {
                     Text("Try Again")
                         .foregroundColor(.blue)
                 }
-            }
-            .padding()
             Spacer()
         }
     }
@@ -195,8 +191,18 @@ class PreviewConverterViewModelWrapper: ConverterViewModelWrapper {
         self.state = ConverterScreenState.Loaded(rates: [
             CurrencyRateViewData(code: "USD", amountStr: "1.23", cursorPosition: nil),
             CurrencyRateViewData(code: "EUR", amountStr: "0.95", cursorPosition: nil),
-            CurrencyRateViewData(code: "JPY", amountStr: "110.0", cursorPosition: nil)
+            CurrencyRateViewData(code: "JPY", amountStr: "110.0", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY2", amountStr: "110.0", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY3", amountStr: "110.0", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY4", amountStr: "110.0", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY5", amountStr: "110.0", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY6", amountStr: "110.0", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY7", amountStr: "110.0", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY8", amountStr: "110.0", cursorPosition: nil),
+            CurrencyRateViewData(code: "JPY9", amountStr: "110.0", cursorPosition: nil),
         ])
+//        self.state = ConverterScreenState.Loading()
+//        self.state = ConverterScreenState.Error()
     }
     override func startObserving() { }
     override func stopObserving() { }
