@@ -110,12 +110,13 @@ class ConverterViewModelWrapper : ObservableObject {
     func onCurrencyOrAmountChanged(
         rate: CurrentCurrencyRate
     ) {
-        viewModel.onCurrencyOrAmountChanged(currencyRate: rate)
+        viewModel.onIntent(intent: ConverterScreenIntent.CurrencyOrAmountChanged(currencyRate: rate))
     }
 }
 
 struct ConverterView: View {
     @StateObject var viewModel: ConverterViewModelWrapper
+    @State private var showingInfo = false
     
     init(viewModel: ConverterViewModelWrapper = ConverterViewModelWrapper()) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -134,6 +135,18 @@ struct ConverterView: View {
             }
             .navigationTitle("Rates & Conversions")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingInfo = true
+                    }) {
+                        Image(systemName: "info.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingInfo) {
+                InfoView()
+            }
         }
         .onAppear {
             viewModel.startObserving()
