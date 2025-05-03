@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,11 +37,11 @@ internal fun AppInfoScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(R.string.rates_and_conversions_title))
+                    Text(text = stringResource(R.string.about_title))
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.Close, "")
+                        Icon(Icons.Filled.ArrowBack, "")
                     }
                 },
             )
