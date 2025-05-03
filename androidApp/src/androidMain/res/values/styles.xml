@@ -1,13 +1,7 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light" />
-
-    <style name="AppTheme.NoActionBar" parent="AppTheme">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.Splash" parent="AppTheme.NoActionBar">
-        <item name="android:windowBackground">@drawable/bg_splash</item>
-    </style>
+    </style>ø
 </resources>

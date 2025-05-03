@@ -18,6 +18,10 @@ import ru.mamykin.exchange.internal.Closeable
 import ru.mamykin.exchange.logDebug
 import ru.mamykin.exchange.subscribeClosable
 
+/**
+ * Shared ViewModel for both platforms. Since the coroutine scope is manually created it never gets cancelled,
+ * this can be fixed with using expected abstract class + corresponding platform scopes, but skipped here.
+ */
 class ConverterViewModel(
     private val interactor: ConverterInteractor,
 ) {

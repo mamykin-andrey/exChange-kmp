@@ -63,10 +63,8 @@ import ru.mamykin.exchange.AppScreen
 import ru.mamykin.exchange.AppStrings
 import ru.mamykin.exchange.core.getDrawableResId
 
-// TODO: Fix and check viewmodel lifecycle
 // TODO: Fix app icon and title and splash screen
 // TODO: Fix unit-tests mocking
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ConverterScreen(
