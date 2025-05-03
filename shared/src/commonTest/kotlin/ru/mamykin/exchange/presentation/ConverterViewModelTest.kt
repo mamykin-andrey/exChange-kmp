@@ -28,7 +28,7 @@ class ConverterViewModelTest {
 
     @Test
     fun `load rates when started`() {
-        viewModel.startRatesLoading()
+        viewModel.onIntent(ConverterScreenIntent.StartLoading)
 
         // verify { interactor.getRates(null, true) }
         // assertEquals(ratesViewData1, viewModel.rates.value)
@@ -38,9 +38,9 @@ class ConverterViewModelTest {
     fun `stop loading rates when stopped`() {
         val ratesFlow = MutableStateFlow(Result.success(rates1))
         // every { interactor.getRates(null, true) } returns ratesFlow
-        viewModel.startRatesLoading()
+        viewModel.onIntent(ConverterScreenIntent.StartLoading)
 
-        viewModel.stopRatesLoading()
+        viewModel.onIntent(ConverterScreenIntent.StopLoading)
         ratesFlow.value = Result.success(rates2)
 
         // assertEquals(ratesViewData1, viewModel.rates.value)
@@ -80,7 +80,7 @@ class ConverterViewModelTest {
     fun `show error when loading failed`() {
         // every { interactor.getRates(any(), any()) } returns flowOf(Result.failure(IllegalStateException("test!")))
 
-        viewModel.startRatesLoading()
+        viewModel.onIntent(ConverterScreenIntent.StartLoading)
 
         // assertEquals(R.string.error_network, viewModel.error.value)
     }
