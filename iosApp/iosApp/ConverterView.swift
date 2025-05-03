@@ -113,10 +113,10 @@ class ConverterViewModelWrapper : ObservableObject {
         observers = []
     }
     
-    func onCurrencyOrAmountChanged(
-        rate: CurrentCurrencyRate
+    func onIntent(
+        intent: ConverterScreenIntent
     ) {
-        viewModel.onIntent(intent: ConverterScreenIntent.CurrencyOrAmountChanged(currencyRate: rate))
+        viewModel.onIntent(intent: intent)
     }
 }
 
@@ -177,7 +177,7 @@ struct ConverterView: View {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     ForEach(rates, id: \.code) { rate in
                         CurrencyRow(viewData: rate) { updatedRate in
-                            viewModel.onCurrencyOrAmountChanged(rate: updatedRate)
+                            viewModel.onIntent(intent: ConverterScreenIntent.CurrencyOrAmountChanged(currencyRate: updatedRate))
                         }
                         .id(rate.code)
                         .transition(.opacity)
@@ -210,7 +210,7 @@ struct ConverterView: View {
                 Text("Please try again later")
                     .foregroundColor(.gray)
                 Button(action: {
-                    viewModel.startRatesLoading()
+                    viewModel.onIntent(intent: ConverterScreenIntent.RetryLoading())
                 }) {
                     Text("Try Again")
                         .foregroundColor(.blue)

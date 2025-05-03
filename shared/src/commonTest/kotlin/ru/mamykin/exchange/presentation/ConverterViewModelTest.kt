@@ -48,30 +48,30 @@ class ConverterViewModelTest {
 
     @Test
     fun `does nothing when amount str isn't valid`() {
-        viewModel.onCurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "abc"))
+        viewModel.onIntent(ConverterScreenIntent.CurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "abc")))
 
         // verify(exactly = 0) { interactor.getRates(any(), any()) }
     }
 
     @Test
     fun `update rates when amount changed`() {
-        viewModel.onCurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "10"))
+        viewModel.onIntent(ConverterScreenIntent.CurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "10")))
 
         // verify { interactor.getRates(any(), any()) }
     }
 
     @Test
     fun `does nothing when the currency amount isn't changed`() {
-        viewModel.onCurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "10"))
-        viewModel.onCurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "10"))
+        viewModel.onIntent(ConverterScreenIntent.CurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "10")))
+        viewModel.onIntent(ConverterScreenIntent.CurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "10")))
 
         // verify(exactly = 1) { interactor.getRates(any(), any()) }
     }
 
     @Test
     fun `update rates when currency changed`() {
-        viewModel.onCurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "10"))
-        viewModel.onCurrencyOrAmountChanged(CurrentCurrencyRate("EUR", "10"))
+        viewModel.onIntent(ConverterScreenIntent.CurrencyOrAmountChanged(CurrentCurrencyRate(TEST_CURRENCY, "10")))
+        viewModel.onIntent(ConverterScreenIntent.CurrencyOrAmountChanged(CurrentCurrencyRate("EUR", "10")))
 
         // verify(exactly = 2) { interactor.getRates(any(), any()) }
     }

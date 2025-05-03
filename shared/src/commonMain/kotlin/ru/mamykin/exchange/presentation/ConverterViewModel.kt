@@ -46,10 +46,12 @@ class ConverterViewModel(
         return stateFlow.subscribeClosable(viewModelScope, onEach)
     }
 
+    // TODO: Move to the screen instead of activity
     fun startRatesLoading() {
         loadRates(null, true)
     }
 
+    // TODO: Move to the screen instead of activity
     fun stopRatesLoading() {
         ratesJob?.cancel()
         ratesJob = null
@@ -57,12 +59,12 @@ class ConverterViewModel(
 
     fun onIntent(intent: ConverterScreenIntent) = viewModelScope.launch {
         when (intent) {
-            is ConverterScreenIntent.InfoButtonClicked -> {
-                mutableEffectFlow.emit(ConverterScreenEffect.NavigateToInfo)
-            }
-
             is ConverterScreenIntent.CurrencyOrAmountChanged -> {
                 onCurrencyOrAmountChanged(intent.currencyRate)
+            }
+
+            is ConverterScreenIntent.RetryLoading -> {
+                startRatesLoading()
             }
         }
     }
@@ -115,13 +117,12 @@ class ConverterViewModel(
 }
 
 sealed class ConverterScreenIntent {
-    data object InfoButtonClicked : ConverterScreenIntent()
     data class CurrencyOrAmountChanged(val currencyRate: CurrentCurrencyRate) : ConverterScreenIntent()
+    data object RetryLoading : ConverterScreenIntent()
 }
 
 sealed class ConverterScreenEffect {
     data object CurrentRateChanged : ConverterScreenEffect()
-    data object NavigateToInfo : ConverterScreenEffect()
 }
 
 sealed class ConverterScreenState {

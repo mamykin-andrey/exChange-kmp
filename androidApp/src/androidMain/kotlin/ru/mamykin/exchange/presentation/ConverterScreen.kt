@@ -81,10 +81,6 @@ internal fun ConverterScreen(
                     delay(300)
                     listState.scrollToItem(0)
                 }
-
-                is ConverterScreenEffect.NavigateToInfo -> {
-                    navController.navigate(AppScreen.AppInfo.route)
-                }
             }
         }
     }
@@ -102,7 +98,7 @@ internal fun ConverterScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onIntent(ConverterScreenIntent.InfoButtonClicked) }) {
+                    IconButton(onClick = { navController.navigate(AppScreen.AppInfo.route) }) {
                         Icon(Icons.Filled.Info, "")
                     }
                 }
@@ -111,7 +107,7 @@ internal fun ConverterScreen(
             Box(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
                 when (state) {
                     is ConverterScreenState.Loading -> GenericLoadingIndicatorComposable()
-                    is ConverterScreenState.Error -> NetworkErrorComposable()
+                    is ConverterScreenState.Error -> NetworkErrorComposable(onIntent)
                     is ConverterScreenState.Loaded -> RatesListComposable(state, onIntent, listState)
                 }
             }
@@ -236,7 +232,7 @@ private fun GenericLoadingIndicatorComposable() {
 }
 
 @Composable
-private fun NetworkErrorComposable() {
+private fun NetworkErrorComposable(onIntent: (ConverterScreenIntent) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = CenterHorizontally,
@@ -246,7 +242,9 @@ private fun NetworkErrorComposable() {
             color = Color.Black,
             fontSize = 16.sp,
         )
-        Button(onClick = {}) {
+        Button(onClick = {
+            onIntent(ConverterScreenIntent.RetryLoading)
+        }) {
             Text(
                 text = stringResource(R.string.error_retry_title),
             )
