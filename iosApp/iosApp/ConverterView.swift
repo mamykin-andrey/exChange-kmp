@@ -209,6 +209,12 @@ struct ConverterView: View {
                     .foregroundColor(.red)
                 Text("Please try again later")
                     .foregroundColor(.gray)
+                Button(action: {
+                    viewModel.startRatesLoading()
+                }) {
+                    Text("Try Again")
+                        .foregroundColor(.blue)
+                }
             }
             .padding()
             Spacer()
