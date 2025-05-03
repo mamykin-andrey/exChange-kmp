@@ -106,7 +106,7 @@ struct ConverterView: View {
                     errorView()
                 }
             }
-            .navigationTitle("Rates & Conversions")
+            .navigationTitle(AppStrings().CONVERTER_TITLE)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -171,13 +171,13 @@ struct ConverterView: View {
     private func errorView() -> some View {
         VStack {
             Spacer()
-                Text("Unable to load data, please try again")
+            Text(AppStrings().ERROR_NETWORK_TITLE)
                 .font(.body)
                 .padding()
                 Button(action: {
                     viewModel.onIntent(intent: ConverterScreenIntent.RetryLoading())
                 }) {
-                    Text("Try Again")
+                    Text(AppStrings().ERROR_NETWORK_RETRY)
                         .foregroundColor(.blue)
                 }
             Spacer()

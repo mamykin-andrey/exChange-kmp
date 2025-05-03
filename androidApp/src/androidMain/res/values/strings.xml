@@ -1,9 +1,3 @@
 <resources>
     <string name="app_name">exChange</string>
-    <string name="desc_currency_icon">Currency icon</string>
-    <string name="zero_amount" translatable="false">0</string>
-    <string name="rates_and_conversions_title">Rates &amp; conversions</string>
-    <string name="about_title">About</string>
-    <string name="error_network">Unable to load data, please try again</string>
-    <string name="error_retry_title">Retry</string>
 </resources>

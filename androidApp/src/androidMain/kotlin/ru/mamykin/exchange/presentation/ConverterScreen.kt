@@ -48,7 +48,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -61,11 +60,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import ru.mamykin.exchange.AppScreen
-import ru.mamykin.exchange.R
+import ru.mamykin.exchange.AppStrings
 import ru.mamykin.exchange.core.getDrawableResId
 
-// TODO: Move strings to common resources
-// TODO: Add viewmodel for the info screen
+// TODO: Fix and check viewmodel lifecycle
 // TODO: Fix app icon and title and splash screen
 // TODO: Fix unit-tests mocking
 
@@ -102,7 +100,7 @@ internal fun ConverterScreen(
             val activity = (LocalContext.current as? Activity)
             TopAppBar(
                 title = {
-                    Text(text = stringResource(R.string.rates_and_conversions_title))
+                    Text(text = AppStrings.CONVERTER_TITLE)
                 },
                 navigationIcon = {
                     IconButton(onClick = { activity?.finish() }) {
@@ -173,7 +171,7 @@ private fun CurrencyListItemComposable(
         @DrawableRes val iconRes = getDrawableResId(viewData.code.lowercase())
         Image(
             painter = painterResource(id = iconRes),
-            contentDescription = stringResource(id = R.string.desc_currency_icon),
+            contentDescription = "",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(36.dp)
@@ -204,7 +202,7 @@ private fun CurrencyListItemComposable(
                     )
                 }
             },
-            placeholder = { Text(text = stringResource(id = R.string.zero_amount)) },
+            placeholder = { Text(text = "0") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
@@ -251,7 +249,7 @@ private fun NetworkErrorComposable(onIntent: (ConverterScreenIntent) -> Unit) {
         modifier = Modifier.fillMaxSize()
     ) {
         Text(
-            text = stringResource(id = R.string.error_network),
+            text = AppStrings.ERROR_NETWORK_TITLE,
             fontSize = 16.sp,
         )
         Button(
@@ -261,7 +259,7 @@ private fun NetworkErrorComposable(onIntent: (ConverterScreenIntent) -> Unit) {
             modifier = Modifier.padding(top = 12.dp)
         ) {
             Text(
-                text = stringResource(R.string.error_retry_title),
+                text = AppStrings.ERROR_NETWORK_RETRY,
             )
         }
     }

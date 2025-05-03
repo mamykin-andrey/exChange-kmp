@@ -7,13 +7,13 @@ struct InfoView: View {
     var body: some View {
         NavigationView {
             VStack(alignment: .leading, spacing: 0) {
-                Text("Currency exchange rates Kotlin Multiplatform mobile app (Android & iOS). \nClean architecture with shared code for data, domain and presentation layers.\nThe UI is implemented with Jetpack Compose on Android and Swift UI on iOS.")
+                Text(AppStrings().ABOUT_TEXT)
                     .font(.system(size: 16))
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                 
-                Link("See the project on GitHub",
-                     destination: URL(string: "https://github.com/mamykin-andrey/exChange-kmp")!)
+                Link(AppStrings().ABOUT_OPEN_GITHUB_TITLE,
+                     destination: URL(string: AppStrings().ABOUT_GITHUB_URL)!)
                     .font(.system(size: 16))
                     .foregroundColor(.blue)
                     .padding(.horizontal, 16)
@@ -21,7 +21,7 @@ struct InfoView: View {
                 
                 Spacer()
             }
-            .navigationTitle("About")
+            .navigationTitle(AppStrings().ABOUT_TITLE)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
