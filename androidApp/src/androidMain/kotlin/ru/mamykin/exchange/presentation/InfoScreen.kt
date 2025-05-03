@@ -49,7 +49,6 @@ internal fun AppInfoScreen(
             Box(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
                 Column {
                     val context = LocalContext.current
-                    // TODO: Add opening link in iOS
                     Text(
                         text = "Currency exchange rates Kotlin Multiplatform mobile app (Android & iOS). \nClean architecture with shared code for data, domain and presentation layers.\nThe UI is implemented with Jetpack Compose on Android and Swift UI on iOS.",
                         fontSize = 16.sp,

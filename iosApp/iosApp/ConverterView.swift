@@ -90,6 +90,7 @@ class ConverterViewModelWrapper : ObservableObject {
     private let viewModel: ConverterViewModel
     @State private var observers: [Closeable] = []
     @Published var state: ConverterScreenState = ConverterScreenState.Loading()
+    @Published var shouldScrollToTop = false
     
     init() {
         viewModel = KoinHelper().getViewModel()
@@ -98,6 +99,11 @@ class ConverterViewModelWrapper : ObservableObject {
     func startObserving() {
         observers.append(viewModel.observeState(onEach: { state in
             self.state = state
+        }))
+        observers.append(viewModel.observeEffect(onEach: { effect in
+            if effect is ConverterScreenEffect.CurrentRateChanged {
+                self.shouldScrollToTop = true
+            }
         }))
         viewModel.startRatesLoading()
     }
@@ -117,6 +123,7 @@ class ConverterViewModelWrapper : ObservableObject {
 struct ConverterView: View {
     @StateObject var viewModel: ConverterViewModelWrapper
     @State private var showingInfo = false
+    @State private var scrollProxy: ScrollViewProxy?
     
     init(viewModel: ConverterViewModelWrapper = ConverterViewModelWrapper()) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -154,22 +161,36 @@ struct ConverterView: View {
         .onDisappear {
             viewModel.stopObserving()
         }
+        .onChange(of: viewModel.shouldScrollToTop) { newValue in
+            if newValue, let proxy = scrollProxy, let firstRate = (viewModel.state as? ConverterScreenState.Loaded)?.rates.first {
+                withAnimation {
+                    proxy.scrollTo(firstRate.code, anchor: .top)
+                }
+                viewModel.shouldScrollToTop = false
+            }
+        }
     }
     
     private func loadedView(rates: [CurrencyRateViewData]) -> some View {
-        ScrollView {
-            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                ForEach(rates, id: \.code) { rate in
-                    CurrencyRow(viewData: rate) { updatedRate in
-                        viewModel.onCurrencyOrAmountChanged(rate: updatedRate)
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    ForEach(rates, id: \.code) { rate in
+                        CurrencyRow(viewData: rate) { updatedRate in
+                            viewModel.onCurrencyOrAmountChanged(rate: updatedRate)
+                        }
+                        .id(rate.code)
+                        .transition(.opacity)
                     }
-                    .transition(.opacity)
                 }
             }
+            .background(Color(.systemGroupedBackground))
+            .frame(maxHeight: .infinity, alignment: .top)
+            .animation(.easeInOut(duration: 0.3), value: rates)
+            .onAppear {
+                scrollProxy = proxy
+            }
         }
-        .background(Color(.systemGroupedBackground))
-        .frame(maxHeight: .infinity, alignment: .top)
-        .animation(.easeInOut(duration: 0.3), value: rates)
     }
     
     private func loadingView() -> some View {
