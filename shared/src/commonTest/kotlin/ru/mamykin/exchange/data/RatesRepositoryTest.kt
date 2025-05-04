@@ -1,59 +1,72 @@
 package ru.mamykin.exchange.data
 
+import dev.mokkery.answering.returns
+import dev.mokkery.answering.sequentially
+import dev.mokkery.everySuspend
+import dev.mokkery.mock
 import kotlinx.coroutines.test.runTest
 import ru.mamykin.exchange.data.network.RateListResponse
+import ru.mamykin.exchange.data.network.RatesNetworkClient
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class RatesRepositoryTest {
 
-    private val ratesApi = FakeRatesNetworkClient()
-    private val rates1 = listOf(
-        "RUB" to 100f,
-        "USD" to 1f,
+    private val ratesApi: RatesNetworkClient = mock()
+
+    private val ratesResponse1 = RateListResponse(
+        base = "EUR",
+        rates = listOf(
+            "RUB" to 100f,
+            "USD" to 1f,
+        ).toMap()
     )
-    private val rates2 = listOf(
-        "RUB" to 100f,
-        "USD" to 0.9f,
+    private val ratesList1 = ratesResponse1.toDomainModel()
+    private val ratesResponse2 = RateListResponse(
+        base = "EUR",
+        rates = listOf(
+            "RUB" to 100f,
+            "USD" to 0.9f,
+        ).toMap()
     )
-    private val ratesResponse1 = RateListResponse("EUR", rates1.toMap())
-    private val ratesResponse2 = RateListResponse("EUR", rates2.toMap())
+    private val ratesList2 = ratesResponse2.toDomainModel()
+
     private val repository = RatesRepository(ratesApi)
 
     init {
-        ratesApi.everyGetRatesReturn(ratesResponse1, ratesResponse2)
+        everySuspend { ratesApi.getRates() } sequentially {
+            returns(ratesResponse1)
+            returns(ratesResponse2)
+        }
     }
 
     @Test
     fun `return data from remote when cache is empty`() = runTest {
         val response = repository.getRates(false)
 
-        assertEquals(rates1.size, response.size)
-        assertEquals(rates1.first(), response.first().let { it.code to it.amount })
-        assertEquals(rates1[1], response[1].let { it.code to it.amount })
+        assertEquals(ratesList1.size, response.size)
+        assertEquals(ratesList1, response)
     }
 
     @Test
     fun `return data from cache when force is false`() = runTest {
-        // updates cache and uses rates/response 1
+        // update cache with response1
         repository.getRates(false)
 
         val rates = repository.getRates(false)
 
-        assertEquals(rates1.size, rates.size)
-        assertEquals(rates1.first(), rates.first().let { it.code to it.amount })
-        assertEquals(rates1[1], rates[1].let { it.code to it.amount })
+        assertEquals(ratesList1.size, rates.size)
+        assertEquals(ratesList1, rates)
     }
 
     @Test
     fun `return data from remote when force is true`() = runTest {
-        // updates cache and uses rates/response 1
+        // update cache with response1
         repository.getRates(false)
 
         val rates = repository.getRates(true)
 
-        assertEquals(rates2.size, rates.size)
-        assertEquals(rates2.first(), rates.first().let { it.code to it.amount })
-        assertEquals(rates2[1], rates[1].let { it.code to it.amount })
+        assertEquals(ratesList2.size, rates.size)
+        assertEquals(ratesList2, rates)
     }
 }
