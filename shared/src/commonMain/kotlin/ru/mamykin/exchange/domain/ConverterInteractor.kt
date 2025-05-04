@@ -5,15 +5,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ru.mamykin.exchange.catchSafely
 import ru.mamykin.exchange.data.RatesRepository
+import ru.mamykin.exchange.internal.OpenForTesting
 import ru.mamykin.exchange.internal.VisibleForTesting
 import ru.mamykin.exchange.presentation.CurrentCurrencyRate
 
-class ConverterInteractor(
+@OpenForTesting
+open class ConverterInteractor(
     private val ratesRepository: RatesRepository,
 ) {
     companion object {
         @VisibleForTesting
-        const val EXCHANGE_UPDATE_PERIOD_MS = 300_000L
+        const val EXCHANGE_UPDATE_PERIOD_MS = 30_000L
         private const val API_BASE_CURRENCY_CODE = "EUR" // limitations of the API free plan
     }
 
@@ -21,7 +23,7 @@ class ConverterInteractor(
      * @param baseCurrency code and amount of the currency, which is used to calculate the exchange rates for all other currencies
      * @return exchange rates calculated to the current currency, if it's not provided, then EUR will be used
      */
-    fun getRates(
+    open fun getRates(
         baseCurrency: CurrentCurrencyRate?,
         currencyChanged: Boolean,
     ): Flow<Result<List<RateEntity>>> = flow {

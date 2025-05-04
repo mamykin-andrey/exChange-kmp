@@ -1,7 +1,12 @@
 package ru.mamykin.exchange.domain
 
-// import io.mockk.coEvery
-// import io.mockk.mockk
+import dev.mokkery.answering.returns
+import dev.mokkery.answering.sequentially
+import dev.mokkery.answering.throws
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.take
@@ -14,14 +19,14 @@ import ru.mamykin.exchange.presentation.CurrentCurrencyRate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ConverterInteractorTest {
 
     companion object {
         const val TEST_BASE_CURRENCY = "RUB"
     }
 
-    private val ratesRepository: RatesRepository = null!!
-    // private val ratesRepository: RatesRepository = mockk()
+    private val ratesRepository: RatesRepository = mock()
 
     private val rateList1 =
         listOf(RateEntity(TEST_BASE_CURRENCY, 100f), RateEntity("USD", 1.1f), RateEntity("EUR", 1f))
@@ -33,7 +38,10 @@ class ConverterInteractorTest {
     private val interactor = ConverterInteractor(ratesRepository)
 
     init {
-        // coEvery { ratesRepository.getRates(any()) } returnsMany listOf(rateList1, rateList2)
+        everySuspend { ratesRepository.getRates(any()) } sequentially {
+            returns(rateList1)
+            returns(rateList2)
+        }
     }
 
     @Test
@@ -53,9 +61,11 @@ class ConverterInteractorTest {
 
     @Test
     fun getRates_shouldDoesNotStopUpdates_whenErrorOccurs() = runTest(testCoroutineScheduler) {
-        // coEvery { ratesRepository.getRates(true) } returns rateList1
-        // coEvery { ratesRepository.getRates(true) } throws RuntimeException()
-        // coEvery { ratesRepository.getRates(true) } returns rateList2
+        everySuspend { ratesRepository.getRates(true) } sequentially {
+            returns(rateList1)
+            throws(RuntimeException())
+            returns(rateList2)
+        }
         var emissionsCount = 0
         val job = launch {
             interactor.getRates(CurrentCurrencyRate(TEST_BASE_CURRENCY, "1.0", null), false)

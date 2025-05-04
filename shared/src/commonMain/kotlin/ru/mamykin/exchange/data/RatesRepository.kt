@@ -3,13 +3,15 @@ package ru.mamykin.exchange.data
 import ru.mamykin.exchange.data.network.RateListResponse
 import ru.mamykin.exchange.data.network.RatesNetworkClient
 import ru.mamykin.exchange.domain.RateEntity
+import ru.mamykin.exchange.internal.OpenForTesting
 
-class RatesRepository(
+@OpenForTesting
+open class RatesRepository(
     private val ratesNetworkClient: RatesNetworkClient,
 ) {
     private var lastRates: List<RateEntity>? = null
 
-    suspend fun getRates(force: Boolean): List<RateEntity> {
+    open suspend fun getRates(force: Boolean): List<RateEntity> {
         return if (force) {
             getRemoteRates()
         } else {
